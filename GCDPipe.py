@@ -180,7 +180,7 @@ app.layout = html.Div([
     dcc.Markdown(children='''### Optional input files (for drug-gene interaction analysis):'''),
     dcc.Markdown(children='''3. a .csv file with columns named "DRUGBANK_ID" and "pipe_genesymbol", in which drugs and their gene targets are provided. [Example (is assembled from DrugCentral and DGIDB data; can be used as a default input)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/drug_targets_data.csv?token=GHSAT0AAAAAABSVV6MLQZ2CV6EIH6ST6EVUYS6ZZ7Q)'''),
     dcc.Markdown(children='''4. a .csv file with a column named "DRUGBANK_ID" with drugs belinging to the category of interest. [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/schizophrenia_drugs.csv?token=GHSAT0AAAAAABSVV6MKTWRL7SVXUHGCRMPAYS6Z4KQ), [Example 2 (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_drugs.csv?token=GHSAT0AAAAAABSVV6MKYBOJR442UN6IA4PWYS6Z3RA)'''),
-    dcc.Markdown(children='''If the used gene nomenculature is not unified across the files, set an option to unify gene symbols. In this case, they will be remapped to HUGO gene nomenclature.'''),
+    dcc.Markdown(children='''If the used gene nomenculature is not unified across the files, set an option to unify gene symbols. In this case, they will be remapped to HUGO gene nomenclature. Unmapped genes will be dropped and numeric variables will be grouped by gene symbol summarised with 'max' function.'''),
     dcc.Markdown(children='''Note that the provided hyperparameter search space can be changed using the sliders.'''),
     dcc.Markdown(children='''See [Github] (https://github.com/ACDBio/GCDPipe) for further explanations.'''),
 
