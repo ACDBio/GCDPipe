@@ -8,14 +8,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score
 #from sklearn.model_selection import GridSearchCV
 from pactools.grid_search import GridSearchCVProgressBar
+import pickle
 from sklearn.ensemble import RandomForestClassifier
 import shap
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
 from scipy.stats import mannwhitneyu
 import plotly.figure_factory as ff
 
+#Design
 #color_scheme = {
 #    'twocat_1':"#07BEB8",
 #    'twocat_2':"#8F3985"
@@ -36,12 +37,135 @@ color_scheme = {
     'twocat_2':"#ADB1BA"
     }
 
+#Data preprocessing functions
+#Gene nomenclature unification
+def generate_mapped_tfset(template_genedf_filepath, tfset_filepath, tfset_genecol, tfset_truthcol, tfset_name, mapfile='./app_default_assets/HUGO_mappings.pkl', save=False, savepath=None):
+    template_df=pd.read_csv(template_genedf_filepath, index_col=0)
+    tfset_remapped=remap_dataframe(tfset_filepath, dataframe_genecol=tfset_genecol, save=False, toreturn=True, mappingfilepath=mapfile)
+    tfset_remapped=tfset_remapped.rename(columns={tfset_truthcol:tfset_name})
+    tfset_remapped=tfset_remapped.reset_index()
+    tfset_remapped=tfset_remapped[['pipe_genesymbol', tfset_name]]
+    mapped_tfset=pd.merge(template_df, tfset_remapped, how='left', on='pipe_genesymbol')
+    mapped_tfset[tfset_name] = mapped_tfset[tfset_name].fillna('No_data')
+    if save==True:
+        mapped_tfset.to_csv(savepath, index=False)
+    return mapped_tfset
+
+def remap_dataframe(dataframe, dataframe_genecol='pipe_genesymbol', leave_only_genenames_and_scorecol=False, scorecol=None, leave_only_genenames=False, drop_old_genecol=True, drop_unmapped=True, aggregate_data_bygene=True, aggregation_function='max', save=False, savepath=None, mappingfilepath='./app_default_assets/HUGO_mappings.pkl', toreturn=True, sep=','):
+            #dataframe=dataframe.reset_index()
+            dataframe=dataframe.rename(columns={dataframe_genecol: "pipe_genesymbol_unmapped"}, errors="raise")
+            dataframe_genecol='pipe_genesymbol_unmapped'
+            mappingfile=open(mappingfilepath, "rb")
+            mappings=pickle.load(mappingfile)
+            genes= dataframe[dataframe_genecol]
+            map_values=list(mappings.values())
+            map_values=[item for sublist in map_values for item in sublist]
+            map_values=np.array(map_values)
+            mapped_col=[]
+            for g in genes:
+                if g in mappings.keys():
+                    mapped_col.append(g)
+                elif g in map_values:
+                    target_gene=[key for key in mappings if g in mappings[key]]
+                    mapped_col.append(target_gene[0])
+                else:
+                    mapped_col.append('No_data')
+            dataframe['pipe_genesymbol']=mapped_col
+
+            no_unmapped=dataframe[dataframe['pipe_genesymbol']=='No_data'].shape[0]
+            print(f"Number of unmapped values: {no_unmapped}")
+            if drop_old_genecol==True:
+                dataframe=dataframe.drop(dataframe_genecol, axis=1)
+            if drop_unmapped==True:
+                dataframe=dataframe[dataframe['pipe_genesymbol']!='No_data']
+
+            if leave_only_genenames==True:
+                dataframe=dataframe[['pipe_genesymbol']]
+                if save==True:
+                    dataframe.to_csv(savepath, index=False)
+                if toreturn==False:
+                    return
+                else:
+                    return {'data':dataframe, 'no_unmapped':no_unmapped}
+            elif leave_only_genenames_and_scorecol==True:
+                dataframe=dataframe[['pipe_genesymbol', scorecol]]
+                dataframe=dataframe.rename(columns={scorecol:'score'})
+                if save==True:
+                    dataframe.to_csv(savepath, header=False, index=False)
+                if toreturn==False:
+                    return
+                else:
+                    return {'data':dataframe, 'no_unmapped':no_unmapped}
+            else:
+                if aggregate_data_bygene==True:
+                    dataframe=dataframe.groupby('pipe_genesymbol').agg(aggregation_function)
+                    dataframe=dataframe.reset_index()
+                if save==True:
+                    dataframe.to_csv(savepath, sep=sep)
+                if toreturn==True:
+                    return {'data':dataframe, 'no_unmapped':no_unmapped}
+                else:
+                    return
+
+#Training-testing set generation from GWAS loci file
+def get_gene_loci_df(true_gene_df, gene_col='pipe_genesymbol', leading_variant_col='rsid', leading_variant_coord_col='location', leading_variant_chr_col='chromosome', window_bases=500000,genelocs_gencode_withcoords_filepath='./app_default_assets/genelocs_gencode_withcoords.csv'):
+    print('Generating the TF set...')
+    genelocs_gencode_withcoords=pd.read_csv(genelocs_gencode_withcoords_filepath)
+    genelocs_gencode_withcoords['chromosome']=list(map(lambda x:x.split('hr')[1], genelocs_gencode_withcoords['seqname']))
+
+    true_gene_df=true_gene_df.rename(columns={leading_variant_col:'rsid', leading_variant_coord_col:'location',gene_col:'genesymbol', leading_variant_chr_col:'chromosome'})
+    
+    true_gene_df=true_gene_df[['rsid','location','genesymbol','chromosome']]
+    true_gene_df['is_True']=1
+
+    true_genes=list(true_gene_df['genesymbol'])
+    step=int(window_bases/2) #window/2 from each side of the leading variant
+
+    dfs=[]
+    for i in range(len(true_gene_df['rsid'])):
+
+        leading_varname=true_gene_df['rsid'][i]
+        leading_var_chrom=true_gene_df['chromosome'][i]
+        leading_var_bp=true_gene_df['location'][i]
+
+        locus_chrom=leading_var_chrom
+        locus_minbp=leading_var_bp-step
+        locus_maxbp=leading_var_bp+step
+        locus=genelocs_gencode_withcoords[(genelocs_gencode_withcoords['chromosome']==str(locus_chrom)) & (((genelocs_gencode_withcoords['start']<=locus_maxbp) & (genelocs_gencode_withcoords['start']>=locus_minbp))|((genelocs_gencode_withcoords['end']<=locus_maxbp) & (genelocs_gencode_withcoords['end']>=locus_minbp)))]
+        locus['leading_variant']=leading_varname
+        locus['locus_start']=locus_minbp
+        locus['locus_end']=locus_maxbp
+        locus=locus[['genesymbol', 'leading_variant','locus_start', 'locus_end']]
+        dfs.append(locus)
+    
+    result=pd.concat(dfs)
+    result=pd.merge(result,true_gene_df, on='genesymbol', how='left')
+    result=result.fillna(0)
+    #print(f'There are {np.sum(result["is_True"])} true genes in the set')
+    
+    
+    result=result.drop_duplicates('genesymbol')
+    result.is_True=[1 if x in true_genes else 0 for x in list(result.genesymbol)]
+    result=result.rename(columns={'genesymbol':'pipe_genesymbol'})
+    print(f'There are {np.sum(result["is_True"])} true genes in the set')
+    print('TF set is generated.')
+    return {'tfset': result,
+            'risk gene count': np.sum(result["is_True"]),
+            'total gene count': len(result['pipe_genesymbol'])}
 
 
+
+
+
+#App code
 app = Dash()
 app.config['suppress_callback_exceptions'] = True
 
 app.layout = html.Div([
+    dcc.Store(id='gene_data_unmapped'),
+    dcc.Store(id='feature_data_unmapped'),
+    dcc.Store(id='drug_data_unmapped'),
+
     dcc.Store(id='gene_data'),
     dcc.Store(id='feature_data'),
     dcc.Store(id='drug_data'),
@@ -51,18 +175,20 @@ app.layout = html.Div([
     dcc.Markdown(children='''A list of drugs can also be provided to compare probabilities of their targets to be assigned to a risk class with that for other genes as well as to compare maximal risk probabilities of their targets with those for other drugs.'''),
     dcc.Markdown(children='''### Required input files:'''),
     dcc.Markdown(children='''1. a .csv file with columns named "pipe_genesymbol" and "is_True", in which the genes derived from GWAS genetic fine-mapping procedure are listed and their risk category (1 or 0) is provided (a True-False set for classifier training). Example: ...'''),
+    dcc.Markdown(children='''> Alternatively, a .csv file can be specified with the columns: "pipe_genesymbol", "rsid", "chromosome", "location" giving information about the leading variants for the genetically fine-mapped loci and the risk genes which are regarded as driving the associations in these loci. Training-testing gene set will be generated in this case with the genes in the 500 kbase windows around the leading variants. Mark the training-testing set generation option for this. Example: ...'''),
     dcc.Markdown(children='''2. a .csv file with with columns "pipe_genesymbol" and other columns with custom names - gene expression profiles across tissues/cell types of interest to train the classifier on. Example: ...'''),
     dcc.Markdown(children='''### Optional input files (for drug-gene interaction analysis):'''),
     dcc.Markdown(children='''3. a .csv file with columns named "DRUGBANK_ID" and "pipe_genesymbol", in which drugs and their gene targets are provided. Example: ... (is assembled from DrugCentral and DGIDB data and can be used as a default input)'''),
     dcc.Markdown(children='''4. a .csv file with a column named "DRUGBANK_ID" with drugs belinging to the category of interest. Example: ...'''),
+    dcc.Markdown(children='''If the used gene nomenculature is not unified across the files, set an option to unify gene symbols. In this case, they will be remapped to HUGO gene nomenclature.'''),
     dcc.Markdown(children='''Note that the provided hyperparameter search space can be changed using the sliders.'''),
-    dcc.Markdown(children='''See ...github... for further explanations.'''),
+    dcc.Markdown(children='''See [Github] (https://github.com/ACDBio/GCDPipe) for further explanations.'''),
 
     dcc.Markdown(children='''# Input dataset upload'''),
     dcc.Upload(
         id='upload-genes',
         children=html.Div([
-            'Gene data: Drag and Drop or ',
+            '1. Gene data: Drag and Drop or ',
             html.A('Select a File')
         ]),
         style={
@@ -85,10 +211,20 @@ app.layout = html.Div([
                     type="cube",
                 ),
 
+    dcc.Checklist(options=[
+       {'label': 'Locus file is provided: generate the training-testing set from GWAS genetic fine-mapping results', 'value': 'tfset_from_locifile_True'}], 
+       id='tfgen-checklist'),  
+
+    dcc.Loading(
+                    id="tfgen-loading",
+                    children=[html.Div([html.Div(id='tfgen-display')])],
+                    type="cube",
+                ),           
+
     dcc.Upload(
         id='upload-features',
         children=html.Div([
-            'Feature data (expression profiles): Drag and Drop or ',
+            '2. Feature data (expression profiles): Drag and Drop or ',
             html.A('Select a File')
         ]),
         style={
@@ -115,6 +251,17 @@ app.layout = html.Div([
        {'label': 'Drug-risk gene interaction assessment', 'value': 'drug_analysis_True'}], 
        id='upload-drugs-checklist'),
     html.Div(id='upload-drugs-container'),
+
+    dcc.Checklist(options=[
+       {'label': 'Unify gene nomenculature with HUGO', 'value': 'remap_genes_True'}], 
+       id='remapping-checklist'),
+
+    dcc.Loading(
+                    id="remapping-loading",
+                    children=[html.Div([html.Div(id='remapping-display')])],
+                    type="cube",
+                ),
+
     dcc.Markdown(children='''# Training settings'''),
     dcc.Markdown(children=''' \n Number of estimators:'''),
     dcc.Input(id="input-n_estimators", type="number", placeholder="Enter the number...", style={'marginRight':'100px'},  value=3000),
@@ -138,6 +285,182 @@ app.layout = html.Div([
 ])
 
 
+
+
+
+
+
+
+
+@app.callback(Output('gene_data_unmapped', 'data'),
+              Output('upload-genes-display', 'children'),
+              Output('tfgen-display', 'children'),
+              Input('upload-genes', 'contents'),
+              State('upload-genes', 'filename'),
+              State('upload-genes', 'last_modified'),
+              Input('tfgen-checklist', 'value'))
+def process_gene_input(contents, name, date, tfgen_option):
+    if contents is not None:
+        data=parse_content(contents, name, date)
+        genedata_df=pd.read_json(data, orient='split')
+        genedata_df_fordisplay=genedata_df.loc[0:2,:]
+
+        if tfgen_option is None:
+            return data, [html.Div('First rows of the generated set:'), dash_table.DataTable(
+                                                                            genedata_df_fordisplay.to_dict('records'),
+                                                                            [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
+                                                                            style_table={'overflowX': 'auto'},
+                                                                            style_cell={
+                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                                                                                        'overflow': 'hidden',
+                                                                                        'textOverflow': 'ellipsis'
+                                                                                        },
+                                                                            fill_width=False
+                                                                            )], []
+
+        if tfgen_option is not None:
+            if tfgen_option[0]=='tfset_from_locifile_True':
+                res=get_gene_loci_df(true_gene_df=genedata_df)
+                tfdata_df=res['tfset']
+                risk_gene_count=res['risk gene count']
+                total_gene_count=res['total gene count']
+
+            return tfdata_df.to_json(orient='split'), [html.Div('First rows of the generated set:'), dash_table.DataTable(
+                                                                            genedata_df_fordisplay.to_dict('records'),
+                                                                            [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
+                                                                            style_table={'overflowX': 'auto'},
+                                                                            style_cell={
+                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                                                                                        'overflow': 'hidden',
+                                                                                        'textOverflow': 'ellipsis'
+                                                                                        },
+                                                                            fill_width=False
+                                                                            )], [html.Div(f'Risk gene count in the obtained training-testing gene set: {risk_gene_count}'),
+                                                    html.Div(f'Total gene count in the obtained training-testing gene set: {total_gene_count}'),
+                                                    html.Div('The generated set:'),
+                                                    dash_table.DataTable(
+                                                                            tfdata_df.to_dict('records'),
+                                                                            [{'name': i, 'id': i} for i in tfdata_df.columns],
+                                                                            style_table={'overflowX': 'auto'},
+                                                                            style_cell={
+                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                                                                                        'overflow': 'hidden',
+                                                                                        'textOverflow': 'ellipsis'
+                                                                                        },
+                                                                            fill_width=False,
+                                                                            editable=False,
+                                                                            page_current= 0,
+                                                                            page_size= 5,
+                                                                            filter_action="native",
+                                                                            sort_action="native",
+                                                                            export_format="csv"
+                                                                            )]
+
+    else:
+        return [],[],[]
+
+
+@app.callback(Output('gene_data', 'data'),
+              Output('feature_data', 'data'),
+              Output('drug_data', 'data'),
+              Output('remapping-display', 'children'),
+              Input('gene_data_unmapped', 'data'),
+              Input('feature_data_unmapped', 'data'),
+              Input('drug_data_unmapped', 'data'),
+              Input('remapping-checklist','value'),
+              prevent_initial_call=True)
+def unify_gene_nomanclature(genedat, featuredat, drugdat, remapping_option):
+    if remapping_option is not None:
+        genedat_df=pd.read_json(genedat, orient='split')
+        featuredat_df=pd.read_json(featuredat, orient='split')
+
+        genedat_df=genedat_df[['pipe_genesymbol','is_True']]
+        gdat_res=remap_dataframe(genedat_df)
+        genedat_df_mapped=gdat_res['data']
+        genedat_no_unmapped=gdat_res['no_unmapped']
+        
+        ftdat_res=remap_dataframe(featuredat_df)
+        featuredat_df_mapped=ftdat_res['data']
+        featuredat_no_unmapped=ftdat_res['no_unmapped']
+
+
+        
+        displayoutput=[html.Div(f'Unmapped gene count for gene data: {genedat_no_unmapped}'),
+                       html.Div('Mapped gene data:'),
+                                                    dash_table.DataTable(
+                                                                            genedat_df_mapped.to_dict('records'),
+                                                                            [{'name': i, 'id': i} for i in genedat_df_mapped.columns],
+                                                                            style_table={'overflowX': 'auto'},
+                                                                            style_cell={
+                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                                                                                        'overflow': 'hidden',
+                                                                                        'textOverflow': 'ellipsis'
+                                                                                        },
+                                                                            fill_width=False,
+                                                                            editable=False,
+                                                                            page_current= 0,
+                                                                            page_size= 5,
+                                                                            filter_action="native",
+                                                                            sort_action="native",
+                                                                            export_format="csv"
+                                                                            ),
+                        html.Div(f'Unmapped gene count for feature data: {featuredat_no_unmapped}'),
+                        html.Div('Mapped feature data:'),
+                                                    dash_table.DataTable(
+                                                                            featuredat_df_mapped.to_dict('records'),
+                                                                            [{'name': i, 'id': i} for i in featuredat_df_mapped.columns],
+                                                                            style_table={'overflowX': 'auto'},
+                                                                            style_cell={
+                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                                                                                        'overflow': 'hidden',
+                                                                                        'textOverflow': 'ellipsis'
+                                                                                        },
+                                                                            fill_width=False,
+                                                                            editable=False,
+                                                                            page_current= 0,
+                                                                            page_size= 5,
+                                                                            filter_action="native",
+                                                                            sort_action="native",
+                                                                            export_format="csv"
+                                                                            )
+
+                      ]
+
+        if drugdat is not None:
+            drugdat_df=pd.read_json(drugdat, orient='split')
+            ddat_res=remap_dataframe(drugdat_df)
+            drugdat_df_mapped=ddat_res['data']
+            drugdat_no_unmapped=ddat_res['no_unmapped']
+            displayoutput.append(html.Div(f'Unmapped gene count for drug data: {drugdat_no_unmapped}'))
+            displayoutput.append(dash_table.DataTable(
+                                                      drugdat_df_mapped.to_dict('records'),
+                                                      [{'name': i, 'id': i} for i in drugdat_df_mapped.columns],
+                                                      style_table={'overflowX': 'auto'},
+                                                      style_cell={
+                                                                  'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                                                                  'overflow': 'hidden',
+                                                                  'textOverflow': 'ellipsis'
+                                                                   },
+                                                                  fill_width=False,
+                                                                  editable=False,
+                                                                  page_current= 0,
+                                                                  page_size= 5,
+                                                                  filter_action="native",
+                                                                  sort_action="native",
+                                                                  export_format="csv"
+                                                                  ))
+
+
+            return genedat_df_mapped.to_json(orient='split'), featuredat_df_mapped.to_json(orient='split'), drugdat_df_mapped.to_json(orient='split'), displayoutput
+
+        else:
+            return genedat_df_mapped.to_json(orient='split'), featuredat_df_mapped.to_json(orient='split'), [], displayoutput
+
+    else:
+        
+        return genedat, featuredat, drugdat, []
+
+
 def parse_content(contents, filename, date):
     content_type, content_string = contents.split(',')
 
@@ -159,43 +482,12 @@ def parse_content(contents, filename, date):
 
 
 
-@app.callback(Output('gene_data', 'data'),
-              Input('upload-genes', 'contents'),
-              State('upload-genes', 'filename'),
-              State('upload-genes', 'last_modified'))
-def update_output(contents, name, date):
-    if contents is not None:
-        data_content=parse_content(contents, name, date)
-        return data_content
 
-
-@app.callback(Output('upload-genes-display', 'children'),
-              Input('gene_data', 'data'))
-def update_output(data):
-    if data is not None:
-        df=pd.read_json(data, orient='split')
-        df=df.loc[0:2,:]
-        return [
-
-
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns],
-            style_table={'overflowX': 'auto'},
-            style_cell={
-         'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-         'overflow': 'hidden',
-         'textOverflow': 'ellipsis'
-    },
-    fill_width=False
-        )]
-    else:
-        return []
 
         
 @app.callback(Output('upload-features-display', 'children'),
-              Input('feature_data', 'data'))
+              Input('feature_data', 'data'),
+              prevent_initial_call=True)
 def update_output(data):
     if data is not None:
         df=pd.read_json(data, orient='split')
@@ -220,7 +512,8 @@ def update_output(data):
 
 
 @app.callback(Output('upload-drugs-display', 'children'),
-              Input('drug_data', 'data'))
+              Input('drug_data', 'data'),
+              prevent_initial_call=True)
 def update_output(data):
     if data is not None:
         df=pd.read_json(data, orient='split')
@@ -244,7 +537,8 @@ def update_output(data):
         return []
 
 @app.callback(Output('upload-drug-list-display', 'children'),
-              Input('drug_list', 'data'))
+              Input('drug_list', 'data'),
+              prevent_initial_call=True)
 def update_output(data):
     if data is not None:
         df=pd.read_json(data, orient='split')
@@ -273,7 +567,7 @@ def update_output(data):
 
 
 
-@app.callback(Output('feature_data', 'data'),
+@app.callback(Output('feature_data_unmapped', 'data'),
               Input('upload-features', 'contents'),
               State('upload-features', 'filename'),
               State('upload-features', 'last_modified'))
@@ -282,7 +576,7 @@ def update_output(contents, name, date):
         data_content=parse_content(contents, name, date)
         return data_content
 
-@app.callback(Output('drug_data', 'data'),
+@app.callback(Output('drug_data_unmapped', 'data'),
               Input('upload-drugs', 'contents'),
               State('upload-drugs', 'filename'),
               State('upload-drugs', 'last_modified'))
@@ -314,7 +608,7 @@ def add_drugs_upload(drug_option_value):
                 dcc.Upload(
         id='upload-drugs',
         children=html.Div([
-            'Drug-target interaction data (binary): Drag and Drop or ',
+            '3. Drug-target interaction data (binary): Drag and Drop or ',
             html.A('Select a File')
         ]),
         style={
@@ -349,7 +643,7 @@ def add_drug_list_upload(drug_analysis_options_value):
                 dcc.Upload(
             id='upload-drug-list',
             children=html.Div([
-                'Target drug category Drugbank IDs: Drag and Drop or ',
+                '4. Target drug category Drugbank IDs: Drag and Drop or ',
                 html.A('Select a File')
             ]),
             style={
@@ -394,6 +688,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
 
             gene_df=pd.read_json(gene_data, orient='split')
+            gene_df=gene_df[['pipe_genesymbol','is_True']]
             feature_df=pd.read_json(feature_data, orient='split')
 
             processed_df=pd.merge(feature_df, gene_df, on='pipe_genesymbol',how='left')
@@ -470,8 +765,8 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             #plt.ylabel("True Positive Rate")
             #plt.title("Receiver operating characteristic")
             #plt.legend(loc="lower right")
-            fig_roc_sns = plt.gcf()
-            plt.close()
+            #fig_roc_sns = plt.gcf()
+            #plt.close()
             fig_roc = go.Figure()
             name = f"AUC={roc_auc:.2f}"
             fig_roc.add_shape(
