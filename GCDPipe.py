@@ -165,7 +165,6 @@ app.layout = html.Div([
     dcc.Store(id='gene_data_unmapped'),
     dcc.Store(id='feature_data_unmapped'),
     dcc.Store(id='drug_data_unmapped'),
-
     dcc.Store(id='gene_data'),
     dcc.Store(id='feature_data'),
     dcc.Store(id='drug_data'),
@@ -298,7 +297,8 @@ app.layout = html.Div([
               Input('upload-genes', 'contents'),
               State('upload-genes', 'filename'),
               State('upload-genes', 'last_modified'),
-              Input('tfgen-checklist', 'value'))
+              Input('tfgen-checklist', 'value'),
+              prevent_initial_call=True)
 def process_gene_input(contents, name, date, tfgen_option):
     if contents is not None:
         data=parse_content(contents, name, date)
@@ -432,6 +432,7 @@ def unify_gene_nomanclature(genedat, featuredat, drugdat, remapping_option):
             drugdat_df_mapped=ddat_res['data']
             drugdat_no_unmapped=ddat_res['no_unmapped']
             displayoutput.append(html.Div(f'Unmapped gene count for drug data: {drugdat_no_unmapped}'))
+            displayoutput.append(html.Div('Mapped drug data:'))
             displayoutput.append(dash_table.DataTable(
                                                       drugdat_df_mapped.to_dict('records'),
                                                       [{'name': i, 'id': i} for i in drugdat_df_mapped.columns],
@@ -482,23 +483,25 @@ def parse_content(contents, filename, date):
 
 
 
-
-
         
-@app.callback(Output('upload-features-display', 'children'),
-              Input('feature_data', 'data'),
+@app.callback(Output('feature_data_unmapped', 'data'),
+              Output('upload-features-display', 'children'),
+              Input('upload-features', 'contents'),
+              State('upload-features', 'filename'),
+              State('upload-features', 'last_modified'),
               prevent_initial_call=True)
-def update_output(data):
-    if data is not None:
-        df=pd.read_json(data, orient='split')
-        df=df.loc[0:2,:]
-        return [
+def update_output(contents, name, date):
+    if contents is not None:
+        data=parse_content(contents, name, date)
+        featuredata_df=pd.read_json(data, orient='split')
+        featuredata_df_fordisplay=featuredata_df.loc[0:2,:]
+        return data, [
 
 
             html.Div('First rows read:'),
             dash_table.DataTable(
-            df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns],
+            featuredata_df_fordisplay.to_dict('records'),
+            [{'name': i, 'id': i} for i in featuredata_df_fordisplay.columns],
                 style_table={'overflowX': 'auto'},
             style_cell={
                 'height': 'auto',
@@ -508,33 +511,10 @@ def update_output(data):
             fill_width=False
         )]
     else:
-        return []
+        return [],[]
 
 
-@app.callback(Output('upload-drugs-display', 'children'),
-              Input('drug_data', 'data'),
-              prevent_initial_call=True)
-def update_output(data):
-    if data is not None:
-        df=pd.read_json(data, orient='split')
-        df=df.loc[0:2,:]
-        return [
 
-
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
-    else:
-        return []
 
 @app.callback(Output('upload-drug-list-display', 'children'),
               Input('drug_list', 'data'),
@@ -562,28 +542,39 @@ def update_output(data):
         return []
 
 
-
-
-
-
-
-@app.callback(Output('feature_data_unmapped', 'data'),
-              Input('upload-features', 'contents'),
-              State('upload-features', 'filename'),
-              State('upload-features', 'last_modified'))
-def update_output(contents, name, date):
-    if contents is not None:
-        data_content=parse_content(contents, name, date)
-        return data_content
-
 @app.callback(Output('drug_data_unmapped', 'data'),
+              Output('upload-drugs-display', 'children'),
               Input('upload-drugs', 'contents'),
               State('upload-drugs', 'filename'),
               State('upload-drugs', 'last_modified'))
 def update_output(contents, name, date):
     if contents is not None:
         data_content=parse_content(contents, name, date)
-        return data_content
+        data = pd.read_json(data_content, orient='split')
+        data_fordisplay=data.loc[0:2,:]
+        return data_content, [
+
+
+            html.Div('First rows read:'),
+            dash_table.DataTable(
+            data_fordisplay.to_dict('records'),
+            [{'name': i, 'id': i} for i in data_fordisplay.columns],
+                style_table={'overflowX': 'auto'},
+            style_cell={
+                'height': 'auto',
+                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                'whiteSpace': 'normal'
+            },
+            fill_width=False
+        )]
+    else:
+        return [],[]
+
+
+
+
+
+
 
 @app.callback(Output('drug_list', 'data'),
               Input('upload-drug-list', 'contents'),
@@ -596,7 +587,8 @@ def update_output(contents, name, date):
 
 
 @app.callback(Output('upload-drugs-container', 'children'),
-              Input('upload-drugs-checklist', 'value'))
+              Input('upload-drugs-checklist', 'value'),
+              prevent_initial_call=True)
 def add_drugs_upload(drug_option_value):
 
     if (drug_option_value is not None) and (drug_option_value!=[]):
@@ -663,7 +655,14 @@ def add_drug_list_upload(drug_analysis_options_value):
             ]
     else:
         return []
-    
+
+
+
+
+
+
+
+
 @app.callback(Output("training-output", 'children'),
               Input('start_training','n_clicks'),
               Input('gene_data', 'data'),
@@ -676,7 +675,8 @@ def add_drug_list_upload(drug_analysis_options_value):
               Input('upload-drugs-checklist','value'),
               Input('drug_data', 'data'),
               Input('drug-analysis-options-checklist', 'value'),
-              Input('drug_list', 'data'))
+              Input('drug_list', 'data'),
+              prevent_initial_call=True)
 def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, drug_analysis_requirement, d_data, drug_analysis_options, d_list):
     if n_clicks is not None:
         if n_clicks>0:
@@ -1039,4 +1039,4 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
