@@ -904,130 +904,130 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                             },
                             fill_width=False
                             ))
-                            
-            if ('drug_target_comparison_True' in drug_analysis_options) or ('drug_comparison_True' in drug_analysis_options): 
-                res.append(dcc.Markdown(children='''### Drug selection comparison: '''))
-                if d_list is None:
-                    res.append(html.Div(['Drug selection list is missing...']))
-                else:
-                    d_list=pd.read_json(d_list, orient='split')
-                    d_list['target_drug_category']='True'
+            if drug_analysis_options is not None:                
+                if ('drug_target_comparison_True' in drug_analysis_options) or ('drug_comparison_True' in drug_analysis_options): 
+                    res.append(dcc.Markdown(children='''### Drug selection comparison: '''))
+                    if d_list is None:
+                        res.append(html.Div(['Drug selection list is missing...']))
+                    else:
+                        d_list=pd.read_json(d_list, orient='split')
+                        d_list['target_drug_category']='True'
 
-                    if 'drug_target_comparison_True' in drug_analysis_options:
+                        if 'drug_target_comparison_True' in drug_analysis_options:
 
-                        drugdata_df_forcomparison=pd.merge(drugdata_df, d_list, on='DRUGBANK_ID', how='left')
-                        target_genes=np.unique(list(drugdata_df_forcomparison[drugdata_df_forcomparison.target_drug_category=='True']['pipe_genesymbol']))
-                        target_probs_comparison=predicted_probs
-                        target_probs_comparison['is_target_for_selected_drugs']=['True' if gene in target_genes else 'False' for gene in target_probs_comparison['pipe_genesymbol']]
-
-
-
-                        res.append(dcc.Markdown(children='''#### Comparison between target gene probabilities to be assigned to the risk class for the selected drugs and other genes: '''))
-
-                        #fig_target_comparison = px.histogram(target_probs_comparison, x='score', color='is_target_for_selected_drugs',
-                        #                    marginal="box", # box, violin, rug
-                        #                    hover_data=target_probs_comparison.columns,
-                        #                    opacity=0.5,
-                        #                    histnorm="probability density",
-                        #                    barmode='overlay')
-
-                        hist_data = [list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='False']['score']),
-                                    list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='True']['score'])]
-                        group_labels = ['Other genes', 'Target genes for selected drugs']
-                        colors = [color_scheme['twocat_2'], color_scheme['twocat_1']]
-                        fig_target_comparison = ff.create_distplot(hist_data, group_labels, colors=colors, bin_size=.05, show_rug=True) #bin_size=.2
+                            drugdata_df_forcomparison=pd.merge(drugdata_df, d_list, on='DRUGBANK_ID', how='left')
+                            target_genes=np.unique(list(drugdata_df_forcomparison[drugdata_df_forcomparison.target_drug_category=='True']['pipe_genesymbol']))
+                            target_probs_comparison=predicted_probs
+                            target_probs_comparison['is_target_for_selected_drugs']=['True' if gene in target_genes else 'False' for gene in target_probs_comparison['pipe_genesymbol']]
 
 
 
+                            res.append(dcc.Markdown(children='''#### Comparison between target gene probabilities to be assigned to the risk class for the selected drugs and other genes: '''))
 
+                            #fig_target_comparison = px.histogram(target_probs_comparison, x='score', color='is_target_for_selected_drugs',
+                            #                    marginal="box", # box, violin, rug
+                            #                    hover_data=target_probs_comparison.columns,
+                            #                    opacity=0.5,
+                            #                    histnorm="probability density",
+                            #                    barmode='overlay')
 
-
-                        U1, p = mannwhitneyu(list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='True']['score']),
-                        list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='False']['score']))
-                        p=round(p, 5)
-                        name=f'P={p}, U={U1} (Mann-Whitney)'
-
-                        #fig_target_comparison.update_traces(showlegend=False)
-                        fig_target_comparison.update_layout(
-                            template='plotly_white',
-                            title=name,
-                            xaxis_title='is drug selection target',
-                            width=1000, height=700)
-
-                        res.append(dcc.Graph(figure=fig_target_comparison))
-
-                        fig_target_comparison_box = px.box(target_probs_comparison, x='is_target_for_selected_drugs', y='score', color='is_target_for_selected_drugs', points='all',
-                            color_discrete_map={
-                                    'True': color_scheme['twocat_1'],
-                                    'False': color_scheme['twocat_2']
-                                },
-                            hover_data=['pipe_genesymbol', 'score']
-                            )
-                        fig_target_comparison_box.update_traces(showlegend=False)
-                        fig_target_comparison_box.update_layout(
-                            template='plotly_white',
-                            xaxis_title='is drug selection target',
-                            width=500, height=500)
-
-                        res.append(dcc.Graph(figure=fig_target_comparison_box))
-
-
-
-                    
-
-                    if 'drug_comparison_True' in drug_analysis_options:
-                        res.append(dcc.Markdown(children='''#### Comparison between aggregation-based drug scores for the selected drugs and other drugs: '''))
-
-                        drugdata_df_agg_drug_comparison=pd.merge(drugdata_df_agg, d_list, on='DRUGBANK_ID', how='left')
-                        drugdata_df_agg_drug_comparison.target_drug_category=drugdata_df_agg_drug_comparison.target_drug_category.fillna('False')
-
-                        #fig_drug_comparison = px.histogram(drugdata_df_agg_drug_comparison, x='score', color='target_drug_category',
-                        #                    marginal="box", # box, violin, rug
-                        #                    hover_data=drugdata_df_agg_drug_comparison.columns,
-                        #                    opacity=0.5,
-                        #                    histnorm="probability density",
-                        #                    barmode='overlay')
-
-
-                        hist_data = [list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['score']),
-                                    list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['score'])]
-                        group_labels = ['Other drugs', 'Selected drugs']
-                        colors = [color_scheme['twocat_2'], color_scheme['twocat_1']]
-
-                        fig_drug_comparison = ff.create_distplot(hist_data, group_labels, colors=colors, bin_size=.05, show_rug=True) #bin_size=.2
+                            hist_data = [list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='False']['score']),
+                                        list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='True']['score'])]
+                            group_labels = ['Other genes', 'Target genes for selected drugs']
+                            colors = [color_scheme['twocat_2'], color_scheme['twocat_1']]
+                            fig_target_comparison = ff.create_distplot(hist_data, group_labels, colors=colors, bin_size=.05, show_rug=True) #bin_size=.2
 
 
 
 
 
-                        U1, p = mannwhitneyu(list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['score']),
-                        list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['score']))
-                        p=round(p, 5)
-                        name=f'P={p}, U={U1} (Mann-Whitney)'
 
-                        #fig_drug_comparison.update_traces(showlegend=False)
-                        fig_drug_comparison.update_layout(
-                            template='plotly_white',
-                            title=name,
-                            xaxis_title='scores',
-                            width=1000, height=700)
+                            U1, p = mannwhitneyu(list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='True']['score']),
+                            list(target_probs_comparison[target_probs_comparison.is_target_for_selected_drugs=='False']['score']))
+                            p=round(p, 5)
+                            name=f'P={p}, U={U1} (Mann-Whitney)'
 
-                        res.append(dcc.Graph(figure=fig_drug_comparison))
-                    
-                        fig_drug_comparison_box = px.box(drugdata_df_agg_drug_comparison, x='target_drug_category', y='score', color='target_drug_category', points='all',
-                            color_discrete_map={
-                                    'True': color_scheme['twocat_1'],
-                                    'False': color_scheme['twocat_2']
-                                },
-                                hover_data=['DRUGBANK_ID','score']
-                            )
-                        fig_drug_comparison_box.update_traces(showlegend=False)
-                        fig_drug_comparison_box.update_layout(
-                            template='plotly_white',
-                            xaxis_title='is selected drug',
-                            width=500, height=500)
+                            #fig_target_comparison.update_traces(showlegend=False)
+                            fig_target_comparison.update_layout(
+                                template='plotly_white',
+                                title=name,
+                                xaxis_title='is drug selection target',
+                                width=1000, height=700)
 
-                        res.append(dcc.Graph(figure=fig_drug_comparison_box))
+                            res.append(dcc.Graph(figure=fig_target_comparison))
+
+                            fig_target_comparison_box = px.box(target_probs_comparison, x='is_target_for_selected_drugs', y='score', color='is_target_for_selected_drugs', points='all',
+                                color_discrete_map={
+                                        'True': color_scheme['twocat_1'],
+                                        'False': color_scheme['twocat_2']
+                                    },
+                                hover_data=['pipe_genesymbol', 'score']
+                                )
+                            fig_target_comparison_box.update_traces(showlegend=False)
+                            fig_target_comparison_box.update_layout(
+                                template='plotly_white',
+                                xaxis_title='is drug selection target',
+                                width=500, height=500)
+
+                            res.append(dcc.Graph(figure=fig_target_comparison_box))
+
+
+
+                        
+
+                        if 'drug_comparison_True' in drug_analysis_options:
+                            res.append(dcc.Markdown(children='''#### Comparison between aggregation-based drug scores for the selected drugs and other drugs: '''))
+
+                            drugdata_df_agg_drug_comparison=pd.merge(drugdata_df_agg, d_list, on='DRUGBANK_ID', how='left')
+                            drugdata_df_agg_drug_comparison.target_drug_category=drugdata_df_agg_drug_comparison.target_drug_category.fillna('False')
+
+                            #fig_drug_comparison = px.histogram(drugdata_df_agg_drug_comparison, x='score', color='target_drug_category',
+                            #                    marginal="box", # box, violin, rug
+                            #                    hover_data=drugdata_df_agg_drug_comparison.columns,
+                            #                    opacity=0.5,
+                            #                    histnorm="probability density",
+                            #                    barmode='overlay')
+
+
+                            hist_data = [list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['score']),
+                                        list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['score'])]
+                            group_labels = ['Other drugs', 'Selected drugs']
+                            colors = [color_scheme['twocat_2'], color_scheme['twocat_1']]
+
+                            fig_drug_comparison = ff.create_distplot(hist_data, group_labels, colors=colors, bin_size=.05, show_rug=True) #bin_size=.2
+
+
+
+
+
+                            U1, p = mannwhitneyu(list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['score']),
+                            list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['score']))
+                            p=round(p, 5)
+                            name=f'P={p}, U={U1} (Mann-Whitney)'
+
+                            #fig_drug_comparison.update_traces(showlegend=False)
+                            fig_drug_comparison.update_layout(
+                                template='plotly_white',
+                                title=name,
+                                xaxis_title='scores',
+                                width=1000, height=700)
+
+                            res.append(dcc.Graph(figure=fig_drug_comparison))
+                        
+                            fig_drug_comparison_box = px.box(drugdata_df_agg_drug_comparison, x='target_drug_category', y='score', color='target_drug_category', points='all',
+                                color_discrete_map={
+                                        'True': color_scheme['twocat_1'],
+                                        'False': color_scheme['twocat_2']
+                                    },
+                                    hover_data=['DRUGBANK_ID','score']
+                                )
+                            fig_drug_comparison_box.update_traces(showlegend=False)
+                            fig_drug_comparison_box.update_layout(
+                                template='plotly_white',
+                                xaxis_title='is selected drug',
+                                width=500, height=500)
+
+                            res.append(dcc.Graph(figure=fig_drug_comparison_box))
 
 
 
@@ -1039,4 +1039,4 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
