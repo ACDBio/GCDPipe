@@ -174,7 +174,7 @@ app.layout = html.Div([
     dcc.Markdown(children='''A list of drugs can also be provided to compare probabilities of their targets to be assigned to a risk class with that for other genes as well as to compare maximal risk probabilities of their targets with those for other drugs.'''),
     dcc.Markdown(children='''### Required input files:'''),
     dcc.Markdown(children='''1. a .csv file with columns named "pipe_genesymbol" and "is_True", in which the genes derived from GWAS genetic fine-mapping procedure are listed and their risk category (1 or 0) is provided (a True-False set for classifier training). [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/schizophrenia_mapped_tf_geneset.csv?token=GHSAT0AAAAAABSVV6MLYUQXLBY3Y6HR75L6YS6ZTVQ), [Example 2 (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_mapped_tf_geneset.csv?token=GHSAT0AAAAAABSVV6MKJOA5YSLCANFNRKKKYS6ZUQA) '''),
-    dcc.Markdown(children='''> Alternatively, a .csv file can be specified with the columns: "pipe_genesymbol", "rsid", "chromosome", "location" giving information about the leading variants for the genetically fine-mapped loci and the risk genes which are regarded as driving the associations in these loci. Training-testing gene set will be generated in this case with the genes in the 500 kbase windows around the leading variants. Mark the training-testing set generation and gene symbol unification options for this. [Example (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_unmapped_genetic_finemapping_results.csv?token=GHSAT0AAAAAABSVV6MKOMQTKRTN2EVSB2YYYS6ZVIQ)'''),
+    dcc.Markdown(children='''> Alternatively, a .csv file can be specified with the columns: "pipe_genesymbol", "rsid", "chromosome", "location" giving information about the leading variants for the genetically fine-mapped loci and the risk genes which are regarded as driving the associations in these loci (GRCh38 variant coordinates should be given). Training-testing gene set will be generated in this case with the genes in the 500 kbase windows around the leading variants. Mark the training-testing set generation and gene symbol unification options for this. [Example (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_unmapped_genetic_finemapping_results.csv?token=GHSAT0AAAAAABSVV6MKOMQTKRTN2EVSB2YYYS6ZVIQ)'''),
     dcc.Markdown(children='''2. a .csv file with with columns "pipe_genesymbol" and other columns with custom names - gene expression profiles across tissues/cell types of interest to train the classifier on. [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/mapped_ALLEN_GTEx_dataset.csv?token=GHSAT0AAAAAABSVV6MLS5WWAI6JX5WSBUWYYS6ZWHA), [Example 2 (IBD, gzipped)] (https://github.com/ACDBio/GCDPipe/blob/main/app_input_examples/IBD/mapped_DICE_BloodAtlas_Colon_Dropviz_GTEx.csv.gz?raw=true)'''),
     dcc.Markdown(children='''### Optional input files (for drug-gene interaction analysis):'''),
     dcc.Markdown(children='''3. a .csv file with columns named "DRUGBANK_ID" and "pipe_genesymbol", in which drugs and their gene targets are provided. [Example (is assembled from DrugCentral and DGIDB data; can be used as a default input)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/drug_targets_data.csv?token=GHSAT0AAAAAABSVV6MLQZ2CV6EIH6ST6EVUYS6ZZ7Q)'''),
@@ -735,6 +735,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             cm = confusion_matrix(Y_true, predicted_classes, labels=[0, 1])
             cls_report=classification_report(Y_true, predicted_classes, output_dict=True)
             print(cls_report)
+            print(cm)
             #precision=cm[1,1]/(cm[0,1]+cm[1,1])
             #accuracy=(cm[1,1]+cm[0,0])/(cm[1,1]+cm[0,0]+cm[0,1]+cm[1,0])
 
@@ -790,6 +791,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             processed_df=processed_df.iloc[:,:-1]
             predicted_probs=pd.DataFrame.from_dict({'pipe_genesymbol':processed_df.index.tolist()})
             predicted_probs['score']=clf.best_estimator_.predict_proba(processed_df)[:,1]
+            predicted_probs['is_risk_class']=predicted_probs['score']>optimal_threshold
 
             input_risk_genes=list(classifier_building_df[classifier_building_df.is_True==1].index.tolist())
             predicted_probs['is_input_risk_gene']=[1 if gene in input_risk_genes else 0 for gene in predicted_probs['pipe_genesymbol']]
@@ -799,11 +801,15 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
 
             explainer = shap.TreeExplainer(clf.best_estimator_)
-            shap_values = explainer.shap_values(classifier_building_df.iloc[:,:-1])     
+            shap_values = explainer.shap_values(classifier_building_df.iloc[:,:-1])    
+
 
             shap_riskclass_df=pd.DataFrame(shap_values[1])
-            shap_riskclass_df.columns=classifier_building_df.iloc[:, 1:].columns
-            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, 1:].reset_index(drop=True),axis=0)
+            shap_riskclass_df.columns=classifier_building_df.iloc[:,:-1].columns 
+
+  
+
+            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, 1:].reset_index(drop=True),axis=0) #CHECK HERE
             riskclass_shap_featurevalue_correlation=corr_between_shap_and_exprs_values.sort_values(ascending=False)
             riskclass_shap_featurevalue_correlation=riskclass_shap_featurevalue_correlation.fillna(0)
             riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'importance_based_score':list(riskclass_shap_featurevalue_correlation)})
@@ -829,6 +835,12 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                  html.Div([f"Macro average recall {round(cls_report['macro avg']['recall'], 3)}"]),
                  html.Div([f"Macro average f1 score {round(cls_report['macro avg']['f1-score'], 3)}"]),
                  html.Div([f"Macro average support {cls_report['macro avg']['support']}"]),
+
+                 html.Div([f" "]),
+                 
+                 html.Div([f"Optimal decision threshold {optimal_threshold}"]),
+                 #html.Div([f"Confusion matrix {cm}"]),
+
                  
                  dcc.Store(id='gene_probabilities', data=predicted_probs.to_json(orient='split')),
                  dcc.Store(id='expression_profile_importances', data=riskclass_shap_featurevalue_correlation.to_json(orient='split')), 
@@ -882,7 +894,10 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                         drugdata_df=pd.read_json(d_data, orient='split')
                         drugdata_df=pd.merge(drugdata_df, predicted_probs[['pipe_genesymbol','score']], on='pipe_genesymbol', how='left')
                         drugdata_df=drugdata_df.dropna()
+
+
                         drugdata_df_agg=drugdata_df.groupby('DRUGBANK_ID')[['score']].agg('max')
+                        drugdata_df_agg['has_risk_class_targets']=drugdata_df_agg['score']>optimal_threshold
                         drugdata_df_agg=drugdata_df_agg.sort_values(ascending=False, by=['score'])
                         drugdata_df_agg=drugdata_df_agg.reset_index()
                         
