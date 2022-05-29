@@ -118,7 +118,7 @@ In addition, it provides a range of output files:
 - The pipeline returns ranking of features (expression profiles) used for classifier training (characterizing cell types/tissues) based on correlation between SHAP values for the risk class and values of these features (expression intensity in these profiles).  
   
 | expression_profile | importance_based_score |
-| :-----: | :-: | :-: |
+| :-----: | :-: |
 | Inh.L4.5.PVALB.TRIM67 | 0.971200485 |
   
 
