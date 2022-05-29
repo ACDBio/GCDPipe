@@ -39,16 +39,16 @@ For further details on the pipeline, see the publication ...
 ## Installation
   
 ```shell
-## A virtual environment can be created and activated with:
+# A virtual environment can be created and activated with:
 python3 -m venv GCDpipe_env
 source GCDpipe_env/bin/activate
-## Downloading the code:
+# Downloading the code:
 git clone https://github.com/ACDBio/GCDPipe.git
-## It might be required to upgrade pip with: 
+# It might be required to upgrade pip with: 
 python -m pip install --upgrade pip
-## Downloading the required packages: 
+# Downloading the required packages: 
 pip install -r ./GCDPipe/requirements.txt
-## Launching the GCDpipe Dash App:
+# Launching the GCDpipe Dash App:
 python ./GCDPipe/GCDPipe.py
 ```
 ---
