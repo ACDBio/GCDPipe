@@ -13,7 +13,7 @@
 - [INPUT](#input)
 - [OUTPUT](#output)
 - [SETTINGS](#settings)
-- [USAGE DEMONSTRATION](#example)
+- [USAGE DEMONSTRATION](#demo)
 - [CITATION](#citation)
 
 ---
@@ -144,9 +144,9 @@ The pipeline interface allows to define a range of settings for classifier gener
 [Back To The Top](# )
 
 ---  
-## Example  
-  
-  
+## Demo  
+[USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo.gif)
+
 
 [Back To The Top](# )
 
