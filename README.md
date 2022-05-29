@@ -50,6 +50,7 @@ python -m pip install --upgrade pip
 pip install -r ./GCDPipe/requirements.txt
 # Launching the GCDpipe Dash App:
 python ./GCDPipe/GCDPipe.py
-```
+```  
+To use GCDPipe interface, open up the link depicted after the phrase 'Dash is running on ...' in the console.
 ---
 
