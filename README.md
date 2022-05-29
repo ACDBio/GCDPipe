@@ -38,7 +38,7 @@ For further details on the pipeline, see the GCDPipe publication.
 
 ---  
 ## Demo  
-![USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo.gif)
+![USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo_small.gif)
 
 
 [Back To The Top](# )
