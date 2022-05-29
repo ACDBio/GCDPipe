@@ -53,6 +53,9 @@ pip install -r ./GCDPipe/requirements.txt
 python ./GCDPipe/GCDPipe.py
 # To use GCDPipe interface, open up the link depicted after the phrase 'Dash is running on' in the console. 
 ```  
+
+[Back To The Top](# )
+
 ---
 ## Input
 For gene classification, only first two fields need to be filled. The files to the other fields are uploaded in cases when drug prioritization and its initial quality assessment are required.  
@@ -86,5 +89,16 @@ For gene classification, only first two fields need to be filled. The files to t
 | DB05969 | CDK7 |  
 | DB01054 | ADORA3 |
 | DB01054 | TTR |
+
+#### Field 4: Target drug category Drugbank IDs
+- In cases when there exists a list of the drugs with desired functions (drugs for treatment of a disease of interest), it can be uploaded here for  initial quality assessment of gene and drug ranking. The .csv file is expected with one column - DRUGBANK_ID.  
+  
+| DRUGBANK_ID |
+| :-----: |
+| DB00321 |
+| DB01238 |
+| DB14185 |
+
+[Back To The Top](# )
 
 ---
