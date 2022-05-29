@@ -55,7 +55,7 @@ python ./GCDPipe/GCDPipe.py
 ```  
 ---
 ## Input
-For gene classification, only first two fields need to be filled. The files to the other fields are uploaded in cases when drug prioritization and its initial quality assessment are required   
+For gene classification, only first two fields need to be filled. The files to the other fields are uploaded in cases when drug prioritization and its initial quality assessment are required.  
 
  #### Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)  
  Two types of .csv files can be uploaded in this field:  
@@ -78,7 +78,13 @@ For gene classification, only first two fields need to be filled. The files to t
 | :-----: | :-: | :-: | :-: |
 | A2M | 4.15 | 3.83 | 0 |  
 
-
-
+#### Field 3: Drug-target interaction data
+- For drug ranking, the pipeline needs a .csv file with drug identifiers and their gene targets. We assembled an example of such dataset from DGIdb and DrugCentral, which can be found [here](https://github.com/ACDBio/GCDPipe/blob/main/app_input_examples/drug_targets_data.csv). The field with drug IDs is expected to be named 'DRUGBANK_ID' and the field with genes - 'pipe_genesymbol'.  
   
+| DRUGBANK_ID | pipe_genesymbol  |
+| :-----: | :-: |
+| DB05969 | CDK7 |  
+| DB01054 | ADORA3 |
+| DB01054 | TTR |
+
 ---
