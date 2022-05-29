@@ -34,3 +34,21 @@ For further details on the pipeline, see the publication ...
 ### General pipeline scheme
 ![Pipeline Scheme](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdpipe_scheme.png)  
 [Back To The Top](# )
+
+---
+##INSTALLATION
+```console
+## A virtual environment can be created and activated with:
+python3 -m venv GCDpipe_env
+source GCDpipe_env/bin/activate
+## Downloading the code:
+git clone https://github.com/ACDBio/GCDPipe.git
+## It might be required to upgrade pip with: 
+python -m pip install --upgrade pip
+## Downloading the required packages: 
+pip install -r ./GCDPipe/requirements.txt
+## Launching the GCDpipe Dash App:
+python ./GCDPipe/GCDPipe.py
+```
+---
+
