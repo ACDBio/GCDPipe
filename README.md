@@ -30,7 +30,7 @@
 - The risk genes identified with GCDPipe for schizophrenia link dopaminergic synapse, retrograde endocannabinoid signaling, nicotine addiction ad other dysregulations at molecular level; for Alzheimer’s disease it shows diuretics as a leading enriched drug target category, and for IBD it prioritizes TH1/17 and other CD4+ T cells.  
 - In the case studies on IBD and schizophrenia, the obtained gene ranking is significantly enriched with drug targets for the corresponding diseases and drug ranking - in the corresponding disease drugs.
   
-For further details on the pipeline, see the publication ...  
+For further details on the pipeline, see the GCDPipe publication.  
 ### General pipeline scheme
 ![Pipeline Scheme](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdpipe_scheme.png)  
 
