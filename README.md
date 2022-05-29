@@ -53,8 +53,12 @@ python ./GCDPipe/GCDPipe.py
 # To use GCDPipe interface, open up the link depicted after the phrase 'Dash is running on' in the console. 
 ```
 ---
-## Description
+## Input
 
- - The pipeline is designed to use the data on known risk genes (which can be obtained from GWAS fine-mapping) and expression profiles characterizing cell types/tissues to construct a random forest classifier to distinguish risk genes.   
-- A mo
+ > Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)
+ Two types of .csv files can be uploaded in this field:
+ - A file with gene identifiers in the first column and their attribution to risk (1_ or non-risk (0) class.  
+| Attempt | #1  | #2  |
+| :-----: | :-: | :-: |
+| Seconds | 301 | 283 |
 ---
