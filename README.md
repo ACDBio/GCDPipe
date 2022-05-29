@@ -143,7 +143,8 @@ In addition, if a drug set of interest is provided, GCDPipe can run two Mann-Whi
 ## Settings  
 - If the file for the 'Gene Data' field specifies the loci, click the checkbox 'Locus file is provided: generate the training-testing set from GWAS genetic fine-mapping results' to automaticlly select 'false' genes.
 - If gene nomenclature differs across files, unification to HUGO nomenclature can be performed. To use this option, click the checkbox 'Unify gene nomenculature with HUGO'.
-- To perform drug analysis, click the checkbox 'Drug-risk gene interaction assessment' - the required input field and other options will open up.   
+- To perform drug analysis, click the checkbox 'Drug-risk gene interaction assessment' - the required input field and other options will open up. 
+    
 The pipeline interface also allows to define a range of settings for classifier generation:  
 - Number of estimators: decision tree count in a random forest can be changed.
 - Testing gene set/training gene set ratio: a fraction of the genes from the training-testing set to be used for testing.
