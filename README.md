@@ -3,7 +3,6 @@
 ![Project Image](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdbanner_small.png)
 > A radnom forest-based tool for risk gene, disease-relevant cell type and drug ranking for complex traits using GWAS-derived genetic evidence.
 ---
-
 ### Table of Contents
 You're sections headers will be used to reference location of destination.
 
@@ -12,4 +11,5 @@ You're sections headers will be used to reference location of destination.
 - [INPUT](#input)
 - [SETTINGS](#settings)
 - [OUTPUT](#output)
-- [USAGE DEMONSTRATION](#usage)
+- [USAGE EXAMPLE](#example)
+---
