@@ -112,4 +112,12 @@ In addition, it provides a range of output files:
 | :-----: | :-: | :-: | :-: |
 | PPP2R2B | 0.939833072 | TRUE | 0 |
 | CALM2 | 0.939833072 | TRUE | 0 |
-| CACNA1C | 0.936927967 | TRUE | 1 |
+| CACNA1C | 0.936927967 | TRUE | 1 |  
+  
+#### Output file 2: Expression profile (cell type/tissue) ranking
+- The pipeline returns ranking of features (expression profiles) used for classifier training (characterizing cell types/tissues) based on correlation between SHAP values for the risk class and values of these features (expression intensity in these profiles).  
+
+| expression_profile | importance_based_score |
+| :-----: | :-: | :-: | :-: |
+| Inh.L4.5.PVALB.TRIM67 | 0.971200485 |
+
