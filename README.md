@@ -13,8 +13,8 @@
 - [INPUT](#input)
 - [OUTPUT](#output)
 - [SETTINGS](#settings)
-- [EXAMPLE](#example)
-- [CITATION](#cite)
+- [USAGE EXAMPLE](#usage example)
+- [CITATION](#citation)
 
 ---
 
@@ -144,7 +144,7 @@ The pipeline interface allows to define a range of settings for classifier gener
 [Back To The Top](# )
 
 ---  
-## Example  
+## Usage example  
   
   
 
