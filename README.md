@@ -145,7 +145,7 @@ The pipeline interface allows to define a range of settings for classifier gener
 
 ---  
 ## Demo  
-[USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo.gif)
+![USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo.gif)
 
 
 [Back To The Top](# )
