@@ -57,11 +57,26 @@ python ./GCDPipe/GCDPipe.py
 
  Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)  
  Two types of .csv files can be uploaded in this field:  
- - A file with gene identifiers in the first column and their attribution to risk (1_ or non-risk (0) class.  
+ - A file with gene identifiers in the first column and their attribution to risk (1) or non-risk (0) class.  
    
 | pipe_genesymbol | is_True  |
 | :-----: | :-: |
 | ACP5 | 0 |
-| GRIN2A | 1 |
+| GRIN2A | 1 |  
+ - A file, specifying locations of the significant loci in GRCh38 coordinates and the corresponding risk genes for each locus. In this case, all genes lying within 500 kbase window around the locus center (which is expected to be a genome-wide significant variant (a 'leading variant') from GWAS), except for the risk ones are considered as 'false', and a gene set for classifier training and testing is constructed in an automated manner. If not variant ID is unknown, an rsid field can be left blank.  
+  
+| pipe_genesymbol | rsid  |  location  |  chromosome  |
+| :-----: | :-: | :-: | :-: |
+| NOD2 | rs2066844 | 50712015 | 16 |  
+  
+Field 2: Feature data (expression profiles)
+- Here, a .csv file with expression profiles characterizing cell types/tissues of interest can be uploaded. The data can be obtained from a range of publicly available expression atlases and other sources (such as Allen Brain Mep, DropViz, DICE  Immune Cell Atlas, GTEx etc.). These profiles are used as features to build a risk gene classifier. It requires pipe_genesymbol column with gene identifiers and other columns with custom names (for example, names of cell types).
+  
+| pipe_genesymbol | Exc.L5.6.FEZF2.ANKRD20A1  |  Exc.L5.6.THEMIS.TMEM233  |  Inh.L1.LAMP5.NDNF  |
+| :-----: | :-: | :-: | :-: |
+| A2M | 4.15 | 3.83 | 0 |  
+
+
+
   
 ---
