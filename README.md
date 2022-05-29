@@ -121,4 +121,11 @@ In addition, it provides a range of output files:
 | :-----: | :-: |
 | Inh.L4.5.PVALB.TRIM67 | 0.971200485 |
   
+#### Output file 3: Drug ranking
+- If drug ranking is performed, the pipeline gives the file, in which drugs are scored by maximal probability of any of their gene-target to be assigned to the risk class ('score' field). The drugs, which have at least one gene-target attributed to the risk class at default probability threshold (corresponding to maximal difference between tpr and fpr) are marked in the field 'has_risk_class_targets'.  
+  
+| DRUGBANK_ID | score | has_risk_class_targets |
+| :-----: | :-: | :-: |
+| DB06288 | 0.939833072 | TRUE |
+ 
 
