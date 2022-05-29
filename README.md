@@ -50,7 +50,11 @@ python -m pip install --upgrade pip
 pip install -r ./GCDPipe/requirements.txt
 # Launching the GCDpipe Dash App:
 python ./GCDPipe/GCDPipe.py
-```  
-To use GCDPipe interface, open up the link depicted after the phrase 'Dash is running on ...' in the console.
+# To use GCDPipe interface, open up the link depicted after the phrase 'Dash is running on' in the console. 
+```
 ---
+## Description
 
+ - The pipeline is designed to use the data on known risk genes (which can be obtained from GWAS fine-mapping) and expression profiles characterizing cell types/tissues to construct a random forest classifier to distinguish risk genes.   
+- A mo
+---
