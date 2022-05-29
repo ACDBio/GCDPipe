@@ -36,7 +36,7 @@ For further details on the pipeline, see the publication ...
 [Back To The Top](# )
 
 ---
-#### Installation
+## Installation
 
 ```console
 ## A virtual environment can be created and activated with:
@@ -51,4 +51,5 @@ pip install -r ./GCDPipe/requirements.txt
 ## Launching the GCDpipe Dash App:
 python ./GCDPipe/GCDPipe.py
 ```
+---
 
