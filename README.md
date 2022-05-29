@@ -102,3 +102,14 @@ For gene classification, only first two fields need to be filled. The files to t
 [Back To The Top](# )
 
 ---
+## Output  
+The pipeline gives the ROC curve, ROC-AUC and a range of classifier performance metrics for the obtained classifier (the metrics are calculated from testing on a test set of genes automatically generated within the pipeline).  
+In addition, it provides a range of output files:  
+#### Output file 1: Gene Classification Results
+- A .csv file can be downloaded with information on gene attribution to a risk class by the obtained classifier with the probability threshold corresponding to maximal difference between tpr and fpr on the ROC ('is_risk_class' field), probabilities of the genes to be assigned to this class ('score' field) and information on whether the gene was considered as the risk one in the original training-testing set ('is_input_risk_gene' field).  
+  
+| pipe_genesymbol | score | is_risk_class | is_input_risk_gene |
+| :-----: | :-: | :-: | :-: |
+| PPP2R2B | 0.939833072 | TRUE | 0 |
+| CALM2 | 0.939833072 | TRUE | 0 |
+| CACNA1C | 0.936927967 | TRUE | 1 |
