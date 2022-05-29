@@ -36,7 +36,7 @@ For further details on the pipeline, see the publication ...
 [Back To The Top](# )
 
 ---
-##INSTALLATION
+## INSTALLATION  
 ```console
 ## A virtual environment can be created and activated with:
 python3 -m venv GCDpipe_env
