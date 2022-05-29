@@ -129,3 +129,7 @@ In addition, it provides a range of output files:
 | DB06288 | 0.939833072 | TRUE |
  
 In addition, if a drug set of interest is provided, GCDPipe can run two Mann-Whitney tests: comparing the gene scores of all targets of the given drugs with those of other genes and comparing their drug scores with scores of all other drugs. Then it shows the corresponding p-values, U statistics and displays boxplots and density plots for the compared distributions.
+
+[Back To The Top](# )
+
+---
