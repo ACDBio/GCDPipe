@@ -33,6 +33,7 @@
 For further details on the pipeline, see the publication ...  
 ### General pipeline scheme
 ![Pipeline Scheme](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdpipe_scheme.png)  
+
 [Back To The Top](# )
 
 ---
@@ -51,11 +52,12 @@ pip install -r ./GCDPipe/requirements.txt
 # Launching the GCDpipe Dash App:
 python ./GCDPipe/GCDPipe.py
 # To use GCDPipe interface, open up the link depicted after the phrase 'Dash is running on' in the console. 
-```
+```  
 ---
 ## Input
+For gene classification, only first two fields need to be filled. The files to the other fields are uploaded in cases when drug prioritization and its initial quality assessment are required   
 
- Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)  
+ #### Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)  
  Two types of .csv files can be uploaded in this field:  
  - A file with gene identifiers in the first column and their attribution to risk (1) or non-risk (0) class.  
    
@@ -69,7 +71,7 @@ python ./GCDPipe/GCDPipe.py
 | :-----: | :-: | :-: | :-: |
 | NOD2 | rs2066844 | 50712015 | 16 |  
   
-Field 2: Feature data (expression profiles)
+#### Field 2: Feature data (expression profiles)
 - Here, a .csv file with expression profiles characterizing cell types/tissues of interest can be uploaded. The data can be obtained from a range of publicly available expression atlases and other sources (such as Allen Brain Mep, DropViz, DICE  Immune Cell Atlas, GTEx etc.). These profiles are used as features to build a risk gene classifier. It requires pipe_genesymbol column with gene identifiers and other columns with custom names (for example, names of cell types).
   
 | pipe_genesymbol | Exc.L5.6.FEZF2.ANKRD20A1  |  Exc.L5.6.THEMIS.TMEM233  |  Inh.L1.LAMP5.NDNF  |
