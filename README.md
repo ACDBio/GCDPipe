@@ -26,6 +26,7 @@
 - The pipleline was tested on IBD, schizophrenia, Alzheimer's disease. 
 - For schizophrenia, it displays ROC-AUC above 0.9 on test gene set in a risk gene discrimination task.
 - The risk genes identified with GCDPipe for schizophrenia link dopaminergic synapse, retrograde endocannabinoid signaling, nicotine addiction ad other dysregulations at molecular level; for Alzheimer’s disease it shows diuretics as a leading enriched drug target category, and for IBD it prioritizes TH1/17 and other CD4+ T cells.  
+- In the case studies on IBD and schizophrenia, the obtained gene ranking is significantly enriched with drug targets for the corresponding diseases and drug ranking - in corresponding drugs.
   
 For further details on the pipeline, see the publication ...  
   
