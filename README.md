@@ -13,7 +13,7 @@
 - [INPUT](#input)
 - [OUTPUT](#output)
 - [SETTINGS](#settings)
-- [USAGE EXAMPLE](#example)
+- [USAGE DEMONSTRATION](#example)
 - [CITATION](#citation)
 
 ---
