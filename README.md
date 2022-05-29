@@ -30,5 +30,5 @@
   
 For further details on the pipeline, see the publication ...  
 ### General pipeline scheme
-![Pipeline Scheme](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdpipe_scheme.png)
+![Pipeline Scheme](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdpipe_scheme.png)  
 [Back To The Top](#read-me-template)
