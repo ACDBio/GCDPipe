@@ -133,8 +133,9 @@ In addition, if a drug set of interest is provided, GCDPipe can run two Mann-Whi
 [Back To The Top](# )
 
 ---
-## Settings
-- Number of estimators: here decision tree count in a random forest can be changed.
+## Settings  
+The pipeline interface allows to define a range of settings for classifier generation:  
+- Number of estimators: decision tree count in a random forest can be changed.
 - Testing gene set/training gene set ratio: a fraction of the genes from the training-testing set to be used for testing.
 - Max tree depth - a specific maximal depth can be set.
 - Number of samples per leaf: up to 10 different values can be set for hyperparameter search.
