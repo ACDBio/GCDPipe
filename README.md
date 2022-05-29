@@ -143,4 +143,18 @@ The pipeline interface allows to define a range of settings for classifier gener
 
 [Back To The Top](# )
 
+---  
+## Usage example  
+  
+  
+
+[Back To The Top](# )
+
+---  
+## Citation  
+  
+ 
+
+[Back To The Top](# )
+
 ---
