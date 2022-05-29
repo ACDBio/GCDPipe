@@ -9,11 +9,11 @@
 ### Table of Contents
 
 - [DESCRIPTION](#description)
+- [USAGE DEMONSTRATION](#demo)
 - [INSTALLATION](#installation)
 - [INPUT](#input)
 - [OUTPUT](#output)
 - [SETTINGS](#settings)
-- [USAGE DEMONSTRATION](#demo)
 - [CITATION](#citation)
 
 ---
@@ -36,7 +36,14 @@ For further details on the pipeline, see the publication ...
 
 [Back To The Top](# )
 
----
+---  
+## Demo  
+![USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo.gif)
+
+
+[Back To The Top](# )
+
+---  
 ## Installation
   
 ```shell
@@ -140,13 +147,6 @@ The pipeline interface allows to define a range of settings for classifier gener
 - Max tree depth - a specific maximal depth can be set.
 - Number of samples per leaf: up to 10 different values can be set for hyperparameter search.
 - Min number of samples required to split an internal node: up to 10 different values can be set for hyperparameter search.
-
-[Back To The Top](# )
-
----  
-## Demo  
-![USAGE DEMONSTRATION](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/demo.gif)
-
 
 [Back To The Top](# )
 
