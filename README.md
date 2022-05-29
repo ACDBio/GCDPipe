@@ -21,7 +21,7 @@
 ## Description
 
  - The pipeline is designed to use the data on known risk genes (which can be obtained from GWAS fine-mapping) and expression profiles characterizing cell types/tissues to construct a random forest classifier to distinguish risk genes.   
-- A modification of feature importance analysis with SHAP values is used to rank the cell types/tissues by their importance to risk class assignment.   
+- A modification of feature importance analysis with SHAP values is used to rank the cell types/tissues based on their importance for risk class assignment.   
 - The information on drug gene-targets can then be used to rank the drugs by maximal risk class assignment probability of any of their targets.   
 
 ### Pipeline performance checking
@@ -55,10 +55,13 @@ python ./GCDPipe/GCDPipe.py
 ---
 ## Input
 
- > Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)
- Two types of .csv files can be uploaded in this field:
+ Field 1: Gene Data (a data on risk and non-risk genes used for classifier training and testing)  
+ Two types of .csv files can be uploaded in this field:  
  - A file with gene identifiers in the first column and their attribution to risk (1_ or non-risk (0) class.  
-| Attempt | #1  | #2  |
-| :-----: | :-: | :-: |
-| Seconds | 301 | 283 |
+   
+| pipe_genesymbol | is_True  |
+| :-----: | :-: |
+| ACP5 | 0 |
+| GRIN2A | 1 |
+  
 ---
