@@ -1,6 +1,6 @@
 # 
 
-![Project Image](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdbanner_small.png)
+![Project Image](https://github.com/ACDBio/GCDPipe/blob/main/app_default_assets/gcdbanner_small_signed.png)
 > An easy-to-use random forest-based tool for risk gene, cell type and drug ranking for complex traits using GWAS-derived genetic evidence.
 ---
 ### Warning! Drug ranking produced by the pipeline is for scientific purposes only and should not be used as a guidance for clinical practice.
