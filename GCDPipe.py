@@ -169,7 +169,7 @@ app.layout = html.Div([
     dcc.Store(id='feature_data'),
     dcc.Store(id='drug_data'),
     dcc.Store(id='drug_list'),
-    dcc.Markdown(children='''# GCDPipe: A Random Forest-based gene classification and expression profile ranking pipeline with optional drug prioritization from GWAS genetic fine-mapping results'''),
+    dcc.Markdown(children='''# GCDPipe: gene, cell type, and drug prioritization for complex traits'''),
     dcc.Markdown(children='''The pipeline will use GWAS genetic fine-mapping data and expression profiles across cell types/tissues or other categories of interest to train a Random Forest classifier to distinguish the genes belonging to the risk class. Expression profiles will be ranked by correlation between their SHAP and gene expression values. Optionally, drugs can be ranked by maximal probabilities of their targets to be assigned to a risk class.'''),
     dcc.Markdown(children='''A list of drugs can also be provided to compare probabilities of their targets to be assigned to a risk class with that for other genes as well as to compare maximal risk probabilities of their targets with those for other drugs.'''),
     dcc.Markdown(children='''### Required input files:'''),
@@ -268,9 +268,9 @@ app.layout = html.Div([
     dcc.RangeSlider(0, 1, 0.1, value=[0.3], id='input-testing_gs_ratio',  tooltip={"placement": "bottom", "always_visible": True}, marks=None),
     dcc.Markdown(children=''' \n Max tree depth:'''),
     dcc.RangeSlider(1, 100, 1, value=[1], id='input-max_depth',  tooltip={"placement": "bottom", "always_visible": True}, marks=None),
-    dcc.Markdown(children=''' \n Number of samples per leaf:'''),
+    dcc.Markdown(children=''' \n Number of samples per leaf (it is possible to set up to 10 values to search from by sliding the points from the default value):'''),
     dcc.RangeSlider(1, 50, 1, value=[5,5,5,5,5,5,5,5,5,5], id='input-n_samples_per_leaf',  tooltip={"placement": "bottom", "always_visible": True}), #[5,10,15,20,25,30] was used in the original study
-    dcc.Markdown(children=''' \n Min number of samples required to split an internal node:'''),
+    dcc.Markdown(children=''' \n Min number of samples required to split an internal node (set up to 10 values to search from by sliding the points from the default value):'''),
     dcc.RangeSlider(1, 50, 1, value=[5,5,5,5,5,5,5,5,5,5], id='input-min_samples_split',  tooltip={"placement": "bottom", "always_visible": True}), #[2,5,10,20,30,40] was used in the original study
     
     html.Div([html.Button("Launch the pipeline", id="start_training", style={"padding": "1rem 1rem", "margin-top": "2rem", "margin-bottom": "1rem"}),
@@ -302,60 +302,61 @@ app.layout = html.Div([
 def process_gene_input(contents, name, date, tfgen_option):
     if contents is not None:
         data=parse_content(contents, name, date)
-        genedata_df=pd.read_json(data, orient='split')
-        genedata_df_fordisplay=genedata_df.loc[0:2,:]
-
-        if tfgen_option is None:
-            return data, [html.Div('First rows of the generated set:'), dash_table.DataTable(
-                                                                            genedata_df_fordisplay.to_dict('records'),
-                                                                            [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
-                                                                            style_table={'overflowX': 'auto'},
-                                                                            style_cell={
-                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-                                                                                        'overflow': 'hidden',
-                                                                                        'textOverflow': 'ellipsis'
-                                                                                        },
-                                                                            fill_width=False
-                                                                            )], []
-
-        if tfgen_option is not None:
-            if tfgen_option[0]=='tfset_from_locifile_True':
-                res=get_gene_loci_df(true_gene_df=genedata_df)
-                tfdata_df=res['tfset']
-                risk_gene_count=res['risk gene count']
-                total_gene_count=res['total gene count']
-
-            return tfdata_df.to_json(orient='split'), [html.Div('First rows of the generated set:'), dash_table.DataTable(
-                                                                            genedata_df_fordisplay.to_dict('records'),
-                                                                            [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
-                                                                            style_table={'overflowX': 'auto'},
-                                                                            style_cell={
-                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-                                                                                        'overflow': 'hidden',
-                                                                                        'textOverflow': 'ellipsis'
-                                                                                        },
-                                                                            fill_width=False
-                                                                            )], [html.Div(f'Risk gene count in the obtained training-testing gene set: {risk_gene_count}'),
-                                                    html.Div(f'Total gene count in the obtained training-testing gene set: {total_gene_count}'),
-                                                    html.Div('The generated set:'),
-                                                    dash_table.DataTable(
-                                                                            tfdata_df.to_dict('records'),
-                                                                            [{'name': i, 'id': i} for i in tfdata_df.columns],
-                                                                            style_table={'overflowX': 'auto'},
-                                                                            style_cell={
-                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-                                                                                        'overflow': 'hidden',
-                                                                                        'textOverflow': 'ellipsis'
-                                                                                        },
-                                                                            fill_width=False,
-                                                                            editable=False,
-                                                                            page_current= 0,
-                                                                            page_size= 5,
-                                                                            filter_action="native",
-                                                                            sort_action="native",
-                                                                            export_format="csv"
-                                                                            )]
-
+        if data[1]=='ok':
+            data=data[0]
+            genedata_df=pd.read_json(data, orient='split')
+            genedata_df_fordisplay=genedata_df.loc[0:2,:]
+            
+            if tfgen_option is None:
+                return data, [html.Div('First rows of the generated set:'), dash_table.DataTable(
+		                                                                    genedata_df_fordisplay.to_dict('records'),
+		                                                                    [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
+		                                                                    style_table={'overflowX': 'auto'},
+		                                                                    style_cell={
+		                                                                                'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+		                                                                                'overflow': 'hidden',
+		                                                                                'textOverflow': 'ellipsis'
+		                                                                                },
+		                                                                    fill_width=False
+		                                                                    )], []
+            if tfgen_option is not None:
+                if tfgen_option[0]=='tfset_from_locifile_True':
+                    res=get_gene_loci_df(true_gene_df=genedata_df)
+                    tfdata_df=res['tfset']
+                    risk_gene_count=res['risk gene count']
+                    total_gene_count=res['total gene count']
+                    return tfdata_df.to_json(orient='split'), [html.Div('First rows of the generated set:'), dash_table.DataTable(
+	                                                                    genedata_df_fordisplay.to_dict('records'),
+	                                                                    [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
+	                                                                    style_table={'overflowX': 'auto'},
+	                                                                    style_cell={
+		                                                                                'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+		                                                                                'overflow': 'hidden',
+		                                                                                'textOverflow': 'ellipsis'
+		                                                                                },
+		                                                                    fill_width=False
+		                                                                    )], [html.Div(f'Risk gene count in the obtained training-testing gene set: {risk_gene_count}'),
+		                                            html.Div(f'Total gene count in the obtained training-testing gene set: {total_gene_count}'),
+		                                            html.Div('The generated set:'),
+		                                            dash_table.DataTable(
+		                                                                    tfdata_df.to_dict('records'),
+		                                                                    [{'name': i, 'id': i} for i in tfdata_df.columns],
+		                                                                    style_table={'overflowX': 'auto'},
+		                                                                    style_cell={
+		                                                                                'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+		                                                                                'overflow': 'hidden',
+		                                                                                'textOverflow': 'ellipsis'
+		                                                                                },
+		                                                                    fill_width=False,
+		                                                                    editable=False,
+		                                                                    page_current= 0,
+		                                                                    page_size= 5,
+		                                                                    filter_action="native",
+		                                                                    sort_action="native",
+		                                                                    export_format="csv"
+		                                                                    )]
+        if data[1]=='parsing_error':
+            return [], [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')],[]
     else:
         return [],[],[]
 
@@ -473,13 +474,13 @@ def parse_content(contents, filename, date):
                 io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
-        return df.to_json(orient='split')
+            df = [pd.read_excel(io.BytesIO(decoded))]
+        return [df.to_json(orient='split'), 'ok']
     except Exception as e:
         print(e)
-        return html.Div([
+        return [html.Div([
             'There was an error processing this file.'
-        ])
+        ]), 'parsing_error']
 
 
 
@@ -493,23 +494,27 @@ def parse_content(contents, filename, date):
 def update_output(contents, name, date):
     if contents is not None:
         data=parse_content(contents, name, date)
-        featuredata_df=pd.read_json(data, orient='split')
-        featuredata_df_fordisplay=featuredata_df.loc[0:2,:]
-        return data, [
+        if data[1]=='ok':
+            data=data[0]
+            featuredata_df=pd.read_json(data, orient='split')
+            featuredata_df_fordisplay=featuredata_df.loc[0:2,:]
+            return data, [
 
 
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            featuredata_df_fordisplay.to_dict('records'),
-            [{'name': i, 'id': i} for i in featuredata_df_fordisplay.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
+                html.Div('First rows read:'),
+                dash_table.DataTable(
+                featuredata_df_fordisplay.to_dict('records'),
+                [{'name': i, 'id': i} for i in featuredata_df_fordisplay.columns],
+                    style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                fill_width=False
+            )]
+        if data[1]=='parsing_error':
+            return [], [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')]
     else:
         return [],[]
 
@@ -521,23 +526,24 @@ def update_output(contents, name, date):
               prevent_initial_call=True)
 def update_output(data):
     if data is not None:
-        df=pd.read_json(data, orient='split')
-        df=df.loc[0:2,:]
-        return [
-
-
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
+        if data!='parsing_error':
+            df=pd.read_json(data, orient='split')
+            df=df.loc[0:2,:]
+            return [
+                html.Div('First rows read:'),
+                dash_table.DataTable(
+                df.to_dict('records'),
+                [{'name': i, 'id': i} for i in df.columns],
+                    style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                fill_width=False
+            )]
+        if data=='parsing_error':
+            return [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')]
     else:
         return []
 
@@ -550,23 +556,25 @@ def update_output(data):
 def update_output(contents, name, date):
     if contents is not None:
         data_content=parse_content(contents, name, date)
-        data = pd.read_json(data_content, orient='split')
-        data_fordisplay=data.loc[0:2,:]
-        return data_content, [
-
-
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            data_fordisplay.to_dict('records'),
-            [{'name': i, 'id': i} for i in data_fordisplay.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
+        if data_content[1]=='ok':
+            data=data_content[0]
+            data = pd.read_json(data, orient='split')
+            data_fordisplay=data.loc[0:2,:]
+            return data_content[0], [
+                html.Div('First rows read:'),
+                dash_table.DataTable(
+                data_fordisplay.to_dict('records'),
+                [{'name': i, 'id': i} for i in data_fordisplay.columns],
+                    style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                fill_width=False
+            )]
+        if data_content[1]=='parsing_error':
+            return [], [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')]
     else:
         return [],[]
 
@@ -583,6 +591,10 @@ def update_output(contents, name, date):
 def update_output(contents, name, date):
     if contents is not None:
         data_content=parse_content(contents, name, date)
+        if data_content[1]=='ok':
+            data_content=data_content[0]
+        if data_content[1]=='parsing_error':
+            data_content=data_content[1]
         return data_content
 
 
