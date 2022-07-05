@@ -254,6 +254,36 @@ app.layout = html.Div([
     dcc.Checklist(options=[
        {'label': 'Unify gene nomenculature with HUGO', 'value': 'remap_genes_True'}], 
        id='remapping-checklist'),
+       
+#---     
+    html.Div([
+    dcc.Upload(
+        id='upload-drugs',
+        children=html.Div([
+            '3. Drug-target interaction data (binary): Drag and Drop or ',
+            html.A('Select a File')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        # Allow multiple files to be uploaded
+        multiple=False
+    ),
+    html.Div(id='upload-drugs-display'),
+    dcc.Checklist(options=[
+       {'label': 'Compare drug target gene probabilities to be assigned to the risk class for the selected drugs with that for other genes', 'value': 'drug_target_comparison_True'},
+       {'label': 'Compare drug selection scores with other drug scores', 'value': 'drug_comparison_True'}], 
+       id='drug-analysis-options-checklist'), 
+    html.Div(id='drug-target-enrichment-options-container') 
+    ], id='drug_upload_addons', style={'display':'none'}),
+#---
 
     dcc.Loading(
                     id="remapping-loading",
