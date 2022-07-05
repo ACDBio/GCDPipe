@@ -150,8 +150,8 @@ The pipeline interface also allows to define a range of settings for classifier 
 - Number of estimators: decision tree count in a random forest can be changed.
 - Testing gene set/training gene set ratio: a fraction of the genes from the training-testing set to be used for testing.
 - Max tree depth - a specific maximal depth can be set.
-- Number of samples per leaf: up to 10 different values can be set for hyperparameter search.
-- Min number of samples required to split an internal node: up to 10 different values can be set for hyperparameter search.
+- Number of samples per leaf: up to 10 different values can be set for hyperparameter search by sliding the points from the default value.
+- Min number of samples required to split an internal node: up to 10 different values can be set for hyperparameter search by sliding the points from the default value.
 
 [Back To The Top](# )
 
