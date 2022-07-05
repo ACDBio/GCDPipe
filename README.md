@@ -152,6 +152,7 @@ The pipeline interface also allows to define a range of settings for classifier 
 - Max tree depth - a specific maximal depth can be set.
 - Number of samples per leaf: up to 10 different values can be set for hyperparameter search by sliding the points from the default value.
 - Min number of samples required to split an internal node: up to 10 different values can be set for hyperparameter search by sliding the points from the default value.
+- Min impurity decrease: up to 10 different values can be set for hyperparameter search by sliding the points from the default value.
 
 [Back To The Top](# )
 
