@@ -272,7 +272,8 @@ app.layout = html.Div([
     dcc.RangeSlider(1, 50, 1, value=[5,5,5,5,5,5,5,5,5,5], id='input-n_samples_per_leaf',  tooltip={"placement": "bottom", "always_visible": True}), #[5,10,15,20,25,30] was used in the original study
     dcc.Markdown(children=''' \n Min number of samples required to split an internal node (set up to 10 values to search from by sliding the points from the default value):'''),
     dcc.RangeSlider(1, 50, 1, value=[5,5,5,5,5,5,5,5,5,5], id='input-min_samples_split',  tooltip={"placement": "bottom", "always_visible": True}), #[2,5,10,20,30,40] was used in the original study
-    
+    dcc.Markdown(children=''' \n Min impurity decrease (set up to 10 values to search from by sliding the points from the default value):'''),
+    dcc.RangeSlider(0, 1, 0.05, value=[0,0,0,0,0,0,0,0,0,0], id='input-min_impurity_decrease',  tooltip={"placement": "bottom", "always_visible": True}), #0 was used in the original stosy
     html.Div([html.Button("Launch the pipeline", id="start_training", style={"padding": "1rem 1rem", "margin-top": "2rem", "margin-bottom": "1rem"}),
     dcc.Loading(
                     id="training-loading",
@@ -684,12 +685,13 @@ def add_drug_list_upload(drug_analysis_options_value):
               Input('input-max_depth','value'),
               Input('input-n_samples_per_leaf','value'),
               Input('input-min_samples_split','value'),
+              Input('input-min_impurity_decrease','value'),
               Input('upload-drugs-checklist','value'),
               Input('drug_data', 'data'),
               Input('drug-analysis-options-checklist', 'value'),
               Input('drug_list', 'data'),
               prevent_initial_call=True)
-def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, drug_analysis_requirement, d_data, drug_analysis_options, d_list):
+def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, min_impurity_decrease, drug_analysis_requirement, d_data, drug_analysis_options, d_list):
     if n_clicks is not None:
         if n_clicks>0:
             if gene_data is None:
@@ -719,13 +721,14 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             print('Training risk gene count:')
             print(Y_test.sum())
             
-            classifier_tuned_parameters_rf={'bootstrap': [True],
-                                            'max_depth': np.unique(max_depth),
-                                            'max_features': ['auto', 'sqrt'],
+            classifier_tuned_parameters_rf={'bootstrap':[True],
+                                            'max_depth':np.unique(max_depth),
+                                            'max_features':['auto', 'sqrt'],
                                             'min_samples_leaf':np.unique(n_samples_leaf),
                                             'min_samples_split':np.unique(min_samples_split),
                                             'max_features':[None],
-                                            'n_estimators': [n_estimators]}
+                                            'n_estimators':[n_estimators],
+                                            'min_impurity_decrease':np.unique(min_impurity_decrease)}
 
             clf=GridSearchCVProgressBar(RandomForestClassifier(oob_score=True,bootstrap = True), classifier_tuned_parameters_rf, scoring='f1_weighted', verbose=1)
             print('Hyperparameter tuning for the rf model...')
