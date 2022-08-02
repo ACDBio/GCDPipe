@@ -106,6 +106,8 @@ For gene classification, only first two fields need to be filled. The files to t
 | DB01238 |
 | DB14185 |
 
+### Checkbox option: 'Rank the Cellinker small molecule ligands based on the receptor gene score'
+- Mark this checkbox if a separate file with Cellinker small molecule ligand receptor scores and corresponsing ligand information is needed.
 [Back To The Top](# )
 
 ---
@@ -127,8 +129,10 @@ In addition, it provides a range of output files:
 | expression_profile | importance_based_score |
 | :-----: | :-: |
 | Inh.L4.5.PVALB.TRIM67 | 0.971200485 |
-  
-#### Output file 3: Drug ranking
+
+#### Output file 3: Cellinker receptor gene scores with corresponding ligand information
+
+#### Output file 4: Drug ranking
 - If drug ranking is performed, the pipeline gives the file, in which drugs are scored by maximal probability of any of their gene-target to be assigned to the risk class ('score' field). The drugs, which have at least one gene-target attributed to the risk class at default probability threshold (corresponding to maximal difference between tpr and fpr) are marked in the field 'has_risk_class_targets'.  
   
 | DRUGBANK_ID | score | has_risk_class_targets |
