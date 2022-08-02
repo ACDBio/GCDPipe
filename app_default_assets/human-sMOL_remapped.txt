@@ -1,0 +1,340 @@
+pipe_genesymbol	ligand name	ligand_pubchem_sid	ligand_type	LRID
+HTR1A	5-hydroxytryptamine	135651413	Metabolite	LR08151
+HTR1B	5-hydroxytryptamine	135651413	Metabolite	LR08152
+HTR1B	tryptamine	135651581	Metabolite	LR08154
+HTR1B	5-HT-moduline	135651962	Peptide	LR08155
+HTR1D	5-hydroxytryptamine	135651413	Metabolite	LR08156
+HTR1D	5-HT-moduline	135651962	Peptide	LR08157
+HTR1E	5-hydroxytryptamine	135651413	Metabolite	LR08158
+HTR1E	tryptamine	135651581	Metabolite	LR08159
+HTR1F	5-hydroxytryptamine	135651413	Metabolite	LR08160
+HTR2A	5-hydroxytryptamine	135651413	Metabolite	LR08162
+HTR2A	tryptamine	135651581	Metabolite	LR08164
+HTR2B	5-hydroxytryptamine	135651413	Metabolite	LR08165
+HTR2C	5-hydroxytryptamine	135651413	Metabolite	LR08166
+HTR3A	5-hydroxytryptamine	135651413	Metabolite	LR08167
+HTR3A	Ca2+	135652731	Inorganic	LR08169
+HTR3A	Mg2+	135652741	Inorganic	LR08170
+HTR4	5-hydroxytryptamine	135651413	Metabolite	LR08174
+HTR5A	5-hydroxytryptamine	135651413	Metabolite	LR08175
+HTR6	5-hydroxytryptamine	135651413	Metabolite	LR08176
+HTR7	5-hydroxytryptamine	135651413	Metabolite	LR08177
+ADGRB1	phosphatidylserine	135651545	Metabolite	LR08178
+ADRA1A	(-)-adrenaline	135651430	Metabolite	LR08179
+ADRA1A	(-)-noradrenaline	135651527	Metabolite	LR08180
+ADRA1B	(-)-adrenaline	135651430	Metabolite	LR08181
+ADRA1B	(-)-noradrenaline	135651527	Metabolite	LR08182
+ADRA1D	(-)-adrenaline	135651430	Metabolite	LR08183
+ADRA1D	(-)-noradrenaline	135651527	Metabolite	LR08184
+ADRA2A	(-)-adrenaline	135651430	Metabolite	LR08185
+ADRA2A	(-)-noradrenaline	135651527	Metabolite	LR08186
+ADRA2B	(-)-adrenaline	135651430	Metabolite	LR08187
+ADRA2B	(-)-noradrenaline	135651527	Metabolite	LR08188
+ADRA2C	(-)-adrenaline	135651430	Metabolite	LR08189
+ADRA2C	(-)-noradrenaline	135651527	Metabolite	LR08190
+AR	dihydrotestosterone	135651474	Metabolite	LR08191
+ADORA1	adenosine	135651426	Metabolite	LR08192
+ADORA2A	adenosine	135651426	Metabolite	LR08193
+ADORA2B	adenosine	135651426	Metabolite	LR08194
+ADORA3	adenosine	135651426	Metabolite	LR08195
+NMBR	gastrin releasing peptide(14-27)	178102796	Peptide	LR08196
+GRPR	gastrin releasing peptide(14-27)	178102796	Peptide	LR08197
+GRPR	neuromedin C	178102799	Peptide	LR08198
+ADRB1	(-)-adrenaline	135651430	Metabolite	LR08199
+ADRB1	(-)-noradrenaline	135651527	Metabolite	LR08200
+ADRB1	noradrenaline	135651526	Metabolite	LR08201
+ADRB2	(-)-noradrenaline	135651527	Metabolite	LR08202
+ADRB2	(-)-adrenaline	135651430	Metabolite	LR08203
+ADRB2	noradrenaline	135651526	Metabolite	LR08204
+ADRB2	Zn2+	135652747	Inorganic	LR08205
+ADRB3	(-)-adrenaline	135651430	Metabolite	LR08206
+ADRB3	(-)-noradrenaline	135651527	Metabolite	LR08207
+ADRB3	(plusmn)-adrenaline	135651547	Metabolite	LR08208
+LTB4R	12R-HETE	135651371	Metabolite	LR08209
+LTB4R	20-hydroxy-LTB4	135651386	Metabolite	LR08210
+LTB4R2	12-hydroxyheptadecatrienoic acid	178102780	Metabolite	LR08211
+LTB4R2	12-epi LTB4	178102781	Metabolite	LR08212
+LTB4R2	12S-HETE	135651372	Metabolite	LR08213
+LTB4R2	15S-HETE	135651378	Metabolite	LR08214
+LTB4R2	LTB4	53801088	Metabolite	LR08215
+CASR	Ca2+	135652731	Inorganic	LR08217
+CASR	spermine	135651562	Metabolite	LR08218
+CASR	L-tryptophan	135651515	Metabolite	LR08219
+CACNA1G	anandamide	135651438	Metabolite	LR08220
+CACNA1H	anandamide	135651438	Metabolite	LR08221
+CATSPER1	PGE1	135650814	Natural product	LR08222
+CATSPER1	PGE2	135651539	Metabolite	LR08223
+CATSPER1	PGF1alpha	178102065	Metabolite	LR08224
+CATSPER1	progesterone	135651551	Metabolite	LR08225
+CATSPER2	PGE1	135650814	Natural product	LR08226
+CATSPER2	PGE2	135651539	Metabolite	LR08227
+CATSPER2	PGF1alpha	178102065	Metabolite	LR08228
+CATSPER2	progesterone	135651551	Metabolite	LR08229
+CATSPER3	PGE1	135650814	Natural product	LR08230
+CATSPER3	PGE2	135651539	Metabolite	LR08231
+CATSPER3	PGF1alpha	178102065	Metabolite	LR08232
+CATSPER3	progesterone	135651551	Metabolite	LR08233
+CATSPER4	PGE1	135650814	Natural product	LR08234
+CATSPER4	PGE2	135651539	Metabolite	LR08235
+CATSPER4	PGF1alpha	178102065	Metabolite	LR08236
+CATSPER4	progesterone	135651551	Metabolite	LR08237
+CNR1	anandamide	135651438	Metabolite	LR08238
+CNR2	2-arachidonoylglycerol	135651394	Metabolite	LR08239
+CNR2	anandamide	135651438	Metabolite	LR08240
+CCKBR	desulfated cholecystokinin-8	178100598	Peptide	LR08241
+CMKLR1	resolvin E1	178100364	Metabolite	LR08242
+CNGA1	cyclic GMP	135651454	Metabolite	LR08243
+CNGA3	cyclic AMP	135651452	Metabolite	LR08244
+CNGA3	cyclic GMP	135651454	Metabolite	LR08245
+CYSLTR1	LTC4	135651512	Metabolite	LR08246
+CYSLTR1	LTD4	135651513	Metabolite	LR08249
+CYSLTR1	LTE4	135651514	Metabolite	LR08253
+CYSLTR2	LTC4	135651512	Metabolite	LR08257
+CYSLTR2	LTD4	135651513	Metabolite	LR08262
+CYSLTR2	LTE4	135651514	Metabolite	LR08269
+OPRD1	endomorphin-1	135652148	Peptide	LR08274
+PTGDR	PGD2	135651538	Metabolite	LR08275
+PTGDR	PGE1	135650814	Natural product	LR08276
+PTGDR	PGE2	135651539	Metabolite	LR08277
+PTGDR	PGF2alpha	135651540	Metabolite	LR08278
+PTGDR	PGJ2	135651542	Metabolite	LR08279
+PTGDR2	PGD2	135651538	Metabolite	LR08280
+PTGDR2	PGE2	135651539	Metabolite	LR08281
+PTGDR2	PGF2alpha	135651540	Metabolite	LR08282
+PTGDR2	PGJ2	135651542	Metabolite	LR08283
+DRD1	dopamine	135651480	Metabolite	LR08284
+DRD1	noradrenaline	135651526	Metabolite	LR08285
+DRD1	5-hydroxytryptamine	135651413	Metabolite	LR08286
+DRD2	dopamine	135651480	Metabolite	LR08287
+DRD3	dopamine	135651480	Metabolite	LR08288
+DRD4	dopamine	135651480	Metabolite	LR08289
+DRD5	5-hydroxytryptamine	135651413	Metabolite	LR08290
+DRD5	dopamine	135651480	Metabolite	LR08291
+DRD5	noradrenaline	135651526	Metabolite	LR08292
+PTGER1	PGD2	135651538	Metabolite	LR08293
+PTGER1	PGE1	135650814	Natural product	LR08294
+PTGER1	PGE2	135651539	Metabolite	LR08295
+PTGER1	PGF2alpha	135651540	Metabolite	LR08296
+PTGER1	PGI2	135651541	Metabolite	LR08297
+PTGER2	PGD2	135651538	Metabolite	LR08298
+PTGER2	PGE2	135651539	Metabolite	LR08299
+PTGER2	PGF2alpha	135651540	Metabolite	LR08300
+PTGER3	PGE2	135651539	Metabolite	LR08301
+PTGER3	PGF2alpha	135651540	Metabolite	LR08304
+PTGER4	PGD2	135651538	Metabolite	LR08305
+PTGER4	PGE1	135650814	Natural product	LR08307
+PTGER4	PGE2	135651539	Metabolite	LR08309
+PTGER4	PGF2alpha	135651540	Metabolite	LR08311
+PTGER4	PGI2	135651541	Metabolite	LR08313
+ESR1	17beta-estradiol	135651381	Metabolite	LR08314
+ESR1	estriol	135651483	Metabolite	LR08315
+ESR1	estrone	135651484	Metabolite	LR08316
+FFAR1	alpha-linolenic acid	135651436	Metabolite	LR08317
+FFAR1	docosahexaenoic acid	135651477	Metabolite	LR08318
+FFAR1	myristic acid	178100239	Metabolite	LR08319
+FFAR1	oleic acid	135651531	Metabolite	LR08320
+FFAR2	1-methylcyclopropanecarboxylic acid	178103114	Synthetic organic	LR08321
+FFAR2	acetic acid	135651422	Metabolite	LR08322
+FFAR2	butyric acid	135650039	Metabolite	LR08323
+FFAR2	trans-2-methylcrotonic acid	178103113	Synthetic organic	LR08324
+FFAR2	propanoic acid	135651552	Metabolite	LR08325
+FFAR3	1-methylcyclopropanecarboxylic acid	178103114	Synthetic organic	LR08326
+FFAR3	butyric acid	135650039	Metabolite	LR08327
+FFAR3	propanoic acid	135651552	Metabolite	LR08328
+FFAR4	alpha-linolenic acid	135651436	Metabolite	LR08329
+FFAR4	linoleic acid	135651503	Metabolite	LR08330
+FFAR4	myristic acid	178100239	Metabolite	LR08331
+FFAR4	oleic acid	135651531	Metabolite	LR08332
+FPR1	spinorphin	135652476	Peptide	LR08333
+FPR2	PrP106-126	178102864	Peptide	LR08334
+FPR2	aspirin-triggered resolvin D1	178102860	Metabolite	LR08335
+FPR2	LXA4	135651504	Metabolite	LR08336
+FPR2	resolvin D1	178100762	Metabolite	LR08337
+PTGFR	PGD2	135651538	Metabolite	LR08339
+PTGFR	PGE2	135651539	Metabolite	LR08340
+PTGFR	PGF2alpha	135651540	Metabolite	LR08341
+GPBAR1	chenodeoxycholic acid	135651455	Metabolite	LR08343
+GPBAR1	cholic acid	135651459	Metabolite	LR08344
+GPBAR1	deoxycholic acid	135651468	Metabolite	LR08345
+GPBAR1	lithocholic acid	135651505	Metabolite	LR08346
+GPER1	17beta-estradiol	135651381	Metabolite	LR08347
+GPRC6A	glycine	135651492	Metabolite	LR08348
+GPRC6A	L-alanine	135651498	Metabolite	LR08349
+GPRC6A	L-arginine	135651500	Metabolite	LR08350
+GPRC6A	L-citrulline	135650512	Synthetic organic	LR08351
+GPRC6A	L-glutamine	135651502	Metabolite	LR08352
+GPRC6A	L-lysine	135651507	Metabolite	LR08353
+GPRC6A	L-ornithine	135651508	Metabolite	LR08354
+GPRC6A	L-serine	135651510	Metabolite	LR08355
+NPR1	mutant ANP	381744893	Peptide	LR08356
+HCAR1	L-lactic acid	135651506	Metabolite	LR08357
+HCAR2	beta-D-hydroxybutyric acid	135649984	Synthetic organic	LR08358
+HCAR3	3-hydroxyoctanoic acid	135651406	Metabolite	LR08359
+HRH1	histamine	135651493	Metabolite	LR08360
+HRH3	histamine	135651493	Metabolite	LR08361
+HRH4	histamine	135651493	Metabolite	LR08362
+GPR119	N-oleoylethanolamide	135651533	Metabolite	LR08363
+GPR12	sphingosine 1-phosphate	135651563	Metabolite	LR08364
+GPR132	9-hydroxyoctadecadienoic acid	178102204	Metabolite	LR08365
+GPR139	L-phenylalanine	178100347	Metabolite	LR08366
+GPR139	L-tryptophan	135651515	Metabolite	LR08368
+GPR143	levodopa	178100545	Metabolite	LR08370
+GPR174	lysophosphatidylserine	178100887	Metabolite	LR08371
+GPR17	ATP	135651446	Metabolite	LR08372
+GPR17	LTC4	135651512	Metabolite	LR08373
+GPR17	LTD4	135651513	Metabolite	LR08374
+GPR17	UDP-galactose	135651585	Metabolite	LR08375
+GPR17	UDP-glucose	135651586	Metabolite	LR08376
+GPR17	uridine diphosphate	135651583	Metabolite	LR08377
+GPR183	25-hydroxycholesterol	135651392	Metabolite	LR08378
+GPR183	27-hydroxycholesterol	135651393	Metabolite	LR08379
+GPR183	7alpha,27-dihydroxycholesterol	178101170	Metabolite	LR08380
+GPR183	7alpha-hydroxycholesterol	178101168	Metabolite	LR08381
+GPR183	7beta,25-dihydroxycholesterol	178101172	Metabolite	LR08382
+GPR183	7beta,27-dihydroxycholesterol	178101171	Metabolite	LR08383
+GPR183	7beta-hydroxycholesterol	178101169	Metabolite	LR08384
+GPR183	7alpha,25-dihydroxycholesterol	178101167	Metabolite	LR08385
+GPR18	N-arachidonoylglycine	178100542	Metabolite	LR08386
+GPR32	LXA4	135651504	Metabolite	LR08388
+GPR32	resolvin D1	178100762	Metabolite	LR08389
+GPR34	lysophosphatidylserine	178100887	Metabolite	LR08390
+GPR35	2-oleoyl-LPA	135649710	Synthetic organic	LR08391
+GPR35	kynurenic acid	135651497	Metabolite	LR08392
+GPR39	Zn2+	135652747	Inorganic	LR08393
+GPR3	sphingosine 1-phosphate	135651563	Metabolite	LR08394
+GPR55	2-arachidonoylglycerol	135651394	Metabolite	LR08395
+GPR55	anandamide	135651438	Metabolite	LR08396
+GPR55	lysophosphatidylinositol	178100854	Metabolite	LR08397
+GPR55	N-palmitoylethanolamine	178100539	Metabolite	LR08398
+GPR55	2-arachidonoylglycerolphosphoinositol	178100855	Metabolite	LR08399
+GPR63	dihydrosphingosine 1-phosphate	135650184	Synthetic organic	LR08400
+GPR63	dioleoylphosphatidic acid	178102157	Metabolite	LR08401
+GPR63	sphingosine 1-phosphate	135651563	Metabolite	LR08402
+GPR87	LPA	135651509	Metabolite	LR08403
+MRGPRD	beta-alanine	135651448	Metabolite	LR08404
+P2RY10	LPA	135651509	Metabolite	LR08405
+P2RY10	sphingosine 1-phosphate	135651563	Metabolite	LR08406
+PTGIR	PGI2	135651541	Metabolite	LR08407
+PTGIR	PGE1	135650814	Natural product	LR08408
+KCNK10	arachidonic acid	135651442	Metabolite	LR08409
+KCNK18	arachidonic acid	135651442	Metabolite	LR08410
+KCNK2	arachidonic acid	135651442	Metabolite	LR08411
+KCNK4	arachidonic acid	135651442	Metabolite	LR08412
+KCNN1	Ca2+	135652731	Inorganic	LR08413
+KCNN2	Ca2+	135652731	Inorganic	LR08414
+KCNJ12	Mg2+	135652741	Inorganic	LR08415
+KCNJ4	arachidonic acid	135651442	Metabolite	LR08416
+KCNJ4	Mg2+	135652741	Inorganic	LR08417
+KCNJ4	putrescine	135651553	Metabolite	LR08418
+KCNJ4	spermidine	135651561	Metabolite	LR08419
+KCNJ4	spermine	135651562	Metabolite	LR08420
+KCNJ4	H+	135652738	Inorganic	LR08421
+KCNJ14	H+	135652738	Inorganic	LR08423
+KCNJ3	Na+	135652743	Inorganic	LR08424
+KCNJ6	Na+	135652743	Inorganic	LR08425
+KCNJ9	PIP2	135651544	Metabolite	LR08426
+KCNJ5	Na+	135652743	Inorganic	LR08427
+KCNJ5	PIP2	135651544	Metabolite	LR08428
+KCNQ2	PIP2	135651544	Metabolite	LR08429
+KCNQ4	PIP2	135651544	Metabolite	LR08430
+LPAR2	farnesyl diphosphate	135651487	Metabolite	LR08431
+LPAR2	LPA	135651509	Metabolite	LR08432
+LPAR3	LPA	135651509	Metabolite	LR08433
+LPAR3	farnesyl diphosphate	135651487	Metabolite	LR08434
+LPAR3	farnesyl monophosphate	135651488	Metabolite	LR08436
+LPAR4	LPA	135651509	Metabolite	LR08438
+LPAR4	farnesyl diphosphate	135651487	Metabolite	LR08439
+LPAR5	farnesyl monophosphate	135651488	Metabolite	LR08440
+LPAR5	LPA	135651509	Metabolite	LR08441
+LPAR5	farnesyl diphosphate	135651487	Metabolite	LR08443
+LPAR5	N-arachidonoylglycine	178100542	Metabolite	LR08444
+LPAR6	LPA	135651509	Metabolite	LR08445
+GRM1	L-glutamic acid	135651501	Metabolite	LR08446
+GRM2	L-glutamic acid	135651501	Metabolite	LR08447
+GRM3	L-glutamic acid	135651501	Metabolite	LR08449
+GRM3	NAAG	135651520	Metabolite	LR08451
+GRM4	L-glutamic acid	135651501	Metabolite	LR08452
+GRM5	L-glutamic acid	135651501	Metabolite	LR08453
+GRM6	L-glutamic acid	135651501	Metabolite	LR08454
+GRM6	L-serine-O-phosphate	135651511	Metabolite	LR08456
+GRM7	L-glutamic acid	135651501	Metabolite	LR08458
+GRM7	L-serine-O-phosphate	135651511	Metabolite	LR08459
+GRM8	L-glutamic acid	135651501	Metabolite	LR08460
+GRM8	L-serine-O-phosphate	135651511	Metabolite	LR08462
+CHRM1	acetylcholine	135651424	Metabolite	LR08463
+CHRM2	acetylcholine	135651424	Metabolite	LR08464
+CHRM3	acetylcholine	135651424	Metabolite	LR08465
+CHRM4	acetylcholine	135651424	Metabolite	LR08466
+CHRM5	acetylcholine	135651424	Metabolite	LR08467
+MTNR1A	melatonin	135651518	Metabolite	LR08468
+MTNR1B	melatonin	135651518	Metabolite	LR08469
+OPRM1	endomorphin-1	135652148	Peptide	LR08470
+TACR1	neuropeptide-gamma	135652324	Peptide	LR08471
+OXER1	5-oxo-15-HETE	178102788	Metabolite	LR08472
+OXER1	5-oxo-20-HETE	178102790	Metabolite	LR08473
+OXER1	5-oxo-C20:3	135651414	Metabolite	LR08474
+OXER1	5-oxo-ETE	135651415	Metabolite	LR08475
+OXER1	5-oxo-ODE	178102785	Metabolite	LR08476
+OXER1	5S-HETE	135651416	Metabolite	LR08477
+OXER1	5S-HPETE	53801093	Metabolite	LR08478
+OXER1	5-oxo-12-HETE	178102792	Metabolite	LR08479
+OXGR1	alpha-ketoglutaric acid	178100543	Metabolite	LR08480
+P2RX1	ATP	135651446	Metabolite	LR08481
+P2RX3	ATP	135651446	Metabolite	LR08482
+P2RX4	ATP	135651446	Metabolite	LR08483
+P2RX7	ATP	135651446	Metabolite	LR08484
+P2RY11	ATP	135651446	Metabolite	LR08485
+P2RY11	uridine triphosphate	135651592	Metabolite	LR08486
+P2RY12	ADP	135651427	Metabolite	LR08487
+P2RY13	ADP	135651427	Metabolite	LR08488
+P2RY13	ATP	135651446	Metabolite	LR08489
+P2RY14	UDP-galactose	135651585	Metabolite	LR08490
+P2RY14	uridine diphosphate	135651583	Metabolite	LR08491
+P2RY1	ADP	135651427	Metabolite	LR08492
+P2RY1	ATP	135651446	Metabolite	LR08493
+P2RY2	ATP	135651446	Metabolite	LR08495
+P2RY2	uridine triphosphate	135651592	Metabolite	LR08496
+P2RY4	ATP	135651446	Metabolite	LR08497
+P2RY4	uridine triphosphate	135651592	Metabolite	LR08498
+P2RY6	uridine diphosphate	135651583	Metabolite	LR08499
+PTAFR	PAF	135651534	Metabolite	LR08500
+PLD2	oleic acid	135651531	Metabolite	LR08502
+PLD2	PIP2	135651544	Metabolite	LR08503
+PRKCZ	arachidonic acid	135651442	Metabolite	LR08504
+PTH2R	PTHrP-(1-34)	135652422	Peptide	LR08505
+S1PR1	sphingosine 1-phosphate	135651563	Metabolite	LR08506
+S1PR2	sphingosine 1-phosphate	135651563	Metabolite	LR08509
+S1PR3	sphingosine 1-phosphate	135651563	Metabolite	LR08510
+S1PR4	sphingosine 1-phosphate	135651563	Metabolite	LR08513
+S1PR5	sphingosine 1-phosphate	135651563	Metabolite	LR08514
+SUCNR1	maleic acid	340590260	Synthetic organic	LR08515
+SUCNR1	succinic acid	178100544	Metabolite	LR08516
+TAAR1	beta-phenylethylamine	135652016	Metabolite	LR08517
+TAAR1	tyramine	135651582	Metabolite	LR08518
+TBXA2R	PGE2	135651539	Metabolite	LR08519
+TBXA2R	PGF2alpha	135651540	Metabolite	LR08520
+TRPA1	methylglyoxal	178102922	Metabolite	LR08521
+TRPM1	pregnenolone sulphate	178101107	Metabolite	LR08522
+TRPM2	PIP2	135651544	Metabolite	LR08523
+TRPM2	ADP ribose	135651429	Metabolite	LR08524
+TRPM2	cADPR	135651450	Metabolite	LR08525
+TRPM2	H2O2	135652736	Inorganic	LR08526
+TRPM2	NAADP	53801022	Metabolite	LR08527
+TRPM2	NAD	135651521	Metabolite	LR08528
+TRPM2	arachidonic acid	135651442	Metabolite	LR08529
+TRPM3	dihydrosphingosine	135651473	Metabolite	LR08530
+TRPM3	NN-dimethyl-D-erythrosphingosine	135650729	Metabolite	LR08531
+TRPM3	sphingosine	53801018	Metabolite	LR08532
+TRPM3	epipregnanolone sulphate	178101006	Metabolite	LR08533
+TRPM3	pregnenolone sulphate	178101107	Metabolite	LR08534
+TRPM4	Ca2+	135652731	Inorganic	LR08535
+TRPM4	PIP2	135651544	Metabolite	LR08536
+TRPM4	ATP	135651446	Metabolite	LR08537
+TRPM4	adenosine 5'-monophosphate	53801012	Metabolite	LR08538
+TRPM4	ADP	135651427	Metabolite	LR08539
+TRPM6	Mg2+	135652741	Inorganic	LR08540
+MCOLN1	phosphatidyl (3,5) inositol bisphosphate	178100233	Metabolite	LR08541
+TRPV1	anandamide	135651438	Metabolite	LR08542
+ZACN	Cu2+	178100984	Inorganic	LR08544
+ZACN	H+	135652738	Inorganic	LR08545
+ZACN	Zn2+	135652747	Inorganic	LR08546
