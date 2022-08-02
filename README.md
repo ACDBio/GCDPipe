@@ -23,7 +23,7 @@
  - The pipeline is designed to use the data on known risk genes (which can be obtained from GWAS fine-mapping) and expression profiles characterizing cell types/tissues to construct a random forest classifier to distinguish risk genes.   
 - A modification of feature importance analysis with SHAP values is used to rank the cell types/tissues based on their importance for risk class assignment.   
 - The information on drug gene-targets can then be used to rank the drugs by maximal risk class assignment probability of any of their targets.
-- The scores for small molecule receptors from ![Cellinker](http://www.rna-society.org/cellinker/) database with the corresponding ligand information can be obtained in a separate file.
+- The scores for small molecule receptors from [Cellinker](http://www.rna-society.org/cellinker/) database with the corresponding ligand information can be obtained in a separate file.
 
 ### Pipeline performance checking
 - The pipleline was tested on IBD, schizophrenia, Alzheimer's disease. 
