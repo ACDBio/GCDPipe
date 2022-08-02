@@ -106,7 +106,7 @@ For gene classification, only first two fields need to be filled. The files to t
 | DB01238 |
 | DB14185 |
 
-### Checkbox option: 'Rank the Cellinker small molecule ligands based on the receptor gene score'
+#### Checkbox option: 'Rank the Cellinker small molecule ligands based on the receptor gene score'
 - Mark this checkbox if a separate file with Cellinker small molecule ligand receptor scores and corresponsing ligand information is needed.
 [Back To The Top](# )
 
