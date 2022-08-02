@@ -170,7 +170,7 @@ app.layout = html.Div([
     dcc.Store(id='drug_data'),
     dcc.Store(id='drug_list'),
     dcc.Markdown(children='''# GCDPipe: gene, cell type, and drug prioritization for complex traits'''),
-    dcc.Markdown(children='''The pipeline will use GWAS genetic fine-mapping data and expression profiles across cell types/tissues or other categories of interest to train a Random Forest classifier to distinguish the genes belonging to the risk class. Expression profiles will be ranked by correlation between their SHAP and gene expression values. Optionally, drugs can be ranked by maximal probabilities of their targets to be assigned to a risk class.'''),
+    dcc.Markdown(children='''The pipeline will use GWAS genetic fine-mapping data and expression profiles across cell types/tissues or other categories of interest to train a Random Forest classifier to distinguish the genes belonging to the risk class. Expression profiles will be ranked by correlation between their SHAP and gene expression values. Receptors for small molecule ligands presented in Cellinker database can be subsetted with the corresponding ligand information. Optionally, drugs can be ranked by maximal probabilities of their targets to be assigned to a risk class.'''),
     dcc.Markdown(children='''A list of drugs can also be provided to compare probabilities of their targets to be assigned to a risk class with that for other genes as well as to compare maximal risk probabilities of their targets with those for other drugs.'''),
     dcc.Markdown(children='''### Required input files:'''),
     dcc.Markdown(children='''1. a .csv file with columns named "pipe_genesymbol" and "is_True", in which the genes derived from GWAS genetic fine-mapping procedure are listed and their risk category (1 or 0) is provided (a True-False set for classifier training). [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/schizophrenia_mapped_tf_geneset.csv?token=GHSAT0AAAAAABSVV6MLYUQXLBY3Y6HR75L6YS6ZTVQ), [Example 2 (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_mapped_tf_geneset.csv?token=GHSAT0AAAAAABSVV6MKJOA5YSLCANFNRKKKYS6ZUQA) '''),
@@ -179,6 +179,7 @@ app.layout = html.Div([
     dcc.Markdown(children='''### Optional input files (for drug-gene interaction analysis):'''),
     dcc.Markdown(children='''3. a .csv file with columns named "DRUGBANK_ID" and "pipe_genesymbol", in which drugs and their gene targets are provided. [Example (is assembled from DrugCentral and DGIDB data; can be used as a default input)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/drug_targets_data.csv?token=GHSAT0AAAAAABSVV6MLQZ2CV6EIH6ST6EVUYS6ZZ7Q)'''),
     dcc.Markdown(children='''4. a .csv file with a column named "DRUGBANK_ID" with drugs belinging to the category of interest. [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/schizophrenia_drugs.csv?token=GHSAT0AAAAAABSVV6MKTWRL7SVXUHGCRMPAYS6Z4KQ), [Example 2 (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_drugs.csv?token=GHSAT0AAAAAABSVV6MKYBOJR442UN6IA4PWYS6Z3RA)'''),
+    dcc.Markdown(children='''If Cellinker ligand ranking based on receptor scores is desired, mark the corresponding checkbox.'''),
     dcc.Markdown(children='''If the used gene nomenculature is not unified across the files, set an option to unify gene symbols. In this case, they will be remapped to HUGO gene nomenclature. Unmapped genes will be dropped and numeric variables will be grouped by gene symbol summarised with 'max' function.'''),
     dcc.Markdown(children='''Note that the provided hyperparameter search space can be changed using the sliders.'''),
     dcc.Markdown(children='''See [Github] (https://github.com/ACDBio/GCDPipe) for further explanations.'''),
@@ -245,6 +246,10 @@ app.layout = html.Div([
                     children=[html.Div([html.Div(id='upload-features-display')])],
                     type="cube",
                 ),
+                
+    dcc.Checklist(options=[
+       {'label': 'Rank the Cellinker small molecule ligands based on the receptor gene score', 'value': 'rank_cellinker'}], 
+       id='rank_ligands-checklist'),  
 
     dcc.Checklist(options=[
        {'label': 'Drug-risk gene interaction assessment', 'value': 'drug_analysis_True'}], 
@@ -720,8 +725,9 @@ def add_drug_list_upload(drug_analysis_options_value):
               Input('drug_data', 'data'),
               Input('drug-analysis-options-checklist', 'value'),
               Input('drug_list', 'data'),
+              Input('rank_ligands-checklist','value'),
               prevent_initial_call=True)
-def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, min_impurity_decrease, drug_analysis_requirement, d_data, drug_analysis_options, d_list):
+def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, min_impurity_decrease, drug_analysis_requirement, d_data, drug_analysis_options, d_list, rank_ligands_requirement, cellinker_filepath='./app_default_assets/human-sMOL_remapped.txt'):
     if n_clicks is not None:
         if n_clicks>0:
             if gene_data is None:
@@ -929,6 +935,33 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                     },
                     fill_width=False
                     )]
+                    
+            if rank_ligands_requirement is not None:
+            	if rank_ligands_requirement[0]=='rank_cellinker':
+            	    cellinker_db=pd.read_csv(cellinker_filepath, sep='\t')
+            	    ligand_df=pd.merge(predicted_probs,cellinker_db, on='pipe_genesymbol', how='left')
+            	    ligand_df=ligand_df.dropna()
+            	    ligand_df=ligand_df.sort_values(by='score', axis=0, ascending=False)
+            	    res.append(dcc.Markdown('''### Cellinker receptor gene scores and the associated ligands:'''))
+            	    res.append(dash_table.DataTable(
+                            id='ligand_scores',
+                            data=ligand_df.to_dict('records'),
+                            columns=[{'name': i, 'id': i} for i in ligand_df.columns],
+                            style_table={'overflowX': 'auto'},
+                            editable=False,
+                            page_current= 0,
+                            page_size= 10,
+                            filter_action="native",
+                            sort_action="native",
+                            export_format="csv",
+                            style_cell={
+                            'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                            'overflow': 'hidden',
+                            'textOverflow': 'ellipsis'
+                            },
+                            fill_width=False
+                            ))
+            
             if drug_analysis_requirement is not None:
                 if drug_analysis_requirement[0]=='drug_analysis_True':
                     res.append(dcc.Markdown(children='''# Drug ranking results'''))
