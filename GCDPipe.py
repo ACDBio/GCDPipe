@@ -860,7 +860,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
   
 
-            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, 1:].reset_index(drop=True),axis=0) #CHECK HERE
+            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, :-1].reset_index(drop=True),axis=0) #CHECK HERE
             riskclass_shap_featurevalue_correlation=corr_between_shap_and_exprs_values.sort_values(ascending=False)
             riskclass_shap_featurevalue_correlation=riskclass_shap_featurevalue_correlation.fillna(0)
             riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'importance_based_score':list(riskclass_shap_featurevalue_correlation)})
