@@ -858,12 +858,20 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             shap_riskclass_df=pd.DataFrame(shap_values[1])
             shap_riskclass_df.columns=classifier_building_df.iloc[:,:-1].columns 
 
+            
   
 
             corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, :-1].reset_index(drop=True),axis=0) #CHECK HERE
             riskclass_shap_featurevalue_correlation=corr_between_shap_and_exprs_values.sort_values(ascending=False)
             riskclass_shap_featurevalue_correlation=riskclass_shap_featurevalue_correlation.fillna(0)
-            riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'importance_based_score':list(riskclass_shap_featurevalue_correlation)})
+            riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'correlation_based_score':list(riskclass_shap_featurevalue_correlation)})
+            
+            shap_values_df=pd.DataFrame(np.mean(np.abs(shap_riskclass_df))).reset_index().rename(columns={'index':'expression_profile', 0:'mean_abs_riskclass_shap_value'})
+            feature_importance_resdf=pd.merge(shap_values_df, riskclass_shap_featurevalue_correlation)
+            correlation_sign=np.sign(feature_importance_resdf['correlation_based_score'])
+            feature_importance_resdf['shap_value_based_score_signed']=correlation_sign*feature_importance_resdf['mean_abs_riskclass_shap_value']
+
+
             res= [
                  dcc.Markdown(children='''# Classifier test performance'''),
                  dcc.Graph(figure=fig_roc),
@@ -894,7 +902,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
                  
                  dcc.Store(id='gene_probabilities', data=predicted_probs.to_json(orient='split')),
-                 dcc.Store(id='expression_profile_importances', data=riskclass_shap_featurevalue_correlation.to_json(orient='split')), 
+                 dcc.Store(id='expression_profile_importances', data=feature_importance_resdf.to_json(orient='split')), 
                  
                  dcc.Markdown(children='''# Classification results'''),
                  dcc.Markdown(children='''### Gene probabilities to be assigned to the risk class: '''),
@@ -919,8 +927,8 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                 dcc.Markdown(children='''### Importance-based expression profile scores: '''),
                 dash_table.DataTable(
                     id='expression_profile_importances',
-                    data=riskclass_shap_featurevalue_correlation.to_dict('records'),
-                    columns=[{'name': i, 'id': i} for i in riskclass_shap_featurevalue_correlation.columns],
+                    data=feature_importance_resdf.to_dict('records'),
+                    columns=[{'name': i, 'id': i} for i in feature_importance_resdf.columns],
                     style_table={'overflowX': 'auto'},
                     editable=False,
                     page_current= 0,
