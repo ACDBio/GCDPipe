@@ -154,7 +154,22 @@ def get_gene_loci_df(true_gene_df, gene_col='pipe_genesymbol', leading_variant_c
             'total gene count': len(result['pipe_genesymbol'])}
 
 
-
+def shap_feature_ranking(data, shap_values, columns=[]):
+    if not columns: columns = data.columns.tolist()     
+    
+    c_idxs = []
+    for column in columns: c_idxs.append(data.columns.get_loc(column))  
+    if isinstance(shap_values, list):  
+        means = [np.abs(shap_values[class_][:, c_idxs]).mean(axis=0) for class_ in range(len(shap_values))] 
+        shap_means = np.sum(np.column_stack(means), 1) 
+    else:                              
+        assert len(shap_values.shape) == 2, 'Expected two-dimensional shap values array.'
+        shap_means = np.abs(shap_values).mean(axis=0)
+    
+    
+    df_ranking = pd.DataFrame({'expression_profile': columns, 'mean_shap_value': shap_means}).sort_values(by='mean_shap_value', ascending=False).reset_index(drop=True)
+    df_ranking.index += 1
+    return df_ranking
 
 
 #App code
@@ -864,12 +879,17 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, :-1].reset_index(drop=True),axis=0) #CHECK HERE
             riskclass_shap_featurevalue_correlation=corr_between_shap_and_exprs_values.sort_values(ascending=False)
             riskclass_shap_featurevalue_correlation=riskclass_shap_featurevalue_correlation.fillna(0)
-            riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'correlation_based_score':list(riskclass_shap_featurevalue_correlation)})
+            riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'correlational_score':list(riskclass_shap_featurevalue_correlation)})
             
-            shap_values_df=pd.DataFrame(np.mean(np.abs(shap_riskclass_df))).reset_index().rename(columns={'index':'expression_profile', 0:'mean_abs_riskclass_shap_value'})
-            feature_importance_resdf=pd.merge(shap_values_df, riskclass_shap_featurevalue_correlation)
-            correlation_sign=np.sign(feature_importance_resdf['correlation_based_score'])
-            feature_importance_resdf['shap_value_based_score_signed']=correlation_sign*feature_importance_resdf['mean_abs_riskclass_shap_value']
+            shap_feature_importances_general=shap_feature_ranking(data=classifier_building_df.iloc[:,:-1], shap_values=shap_values, columns=[])
+
+
+
+            #shap_values_df=pd.DataFrame(np.mean(np.abs(shap_riskclass_df))).reset_index().rename(columns={'index':'expression_profile', 0:'mean_abs_riskclass_shap_value'})
+            feature_importance_resdf=pd.merge(shap_feature_importances_general, riskclass_shap_featurevalue_correlation)
+            #print(feature_importance_resdf)
+            correlation_sign=np.sign(feature_importance_resdf['correlational_score'])
+            feature_importance_resdf['signed_shap_values_score']=correlation_sign*feature_importance_resdf['mean_shap_value']
 
 
             res= [
