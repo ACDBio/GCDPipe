@@ -15,6 +15,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from scipy.stats import mannwhitneyu
 import plotly.figure_factory as ff
+from sklearn.preprocessing import minmax_scale
 
 #Design
 #color_scheme = {
@@ -153,10 +154,6 @@ def get_gene_loci_df(true_gene_df, gene_col='pipe_genesymbol', leading_variant_c
             'risk gene count': np.sum(result["is_True"]),
             'total gene count': len(result['pipe_genesymbol'])}
 
-
-
-
-
 #App code
 app = Dash()
 app.config['suppress_callback_exceptions'] = True
@@ -169,8 +166,8 @@ app.layout = html.Div([
     dcc.Store(id='feature_data'),
     dcc.Store(id='drug_data'),
     dcc.Store(id='drug_list'),
-    dcc.Markdown(children='''# GCDPipe: A Random Forest-based gene classification and expression profile ranking pipeline with optional drug prioritization from GWAS genetic fine-mapping results'''),
-    dcc.Markdown(children='''The pipeline will use GWAS genetic fine-mapping data and expression profiles across cell types/tissues or other categories of interest to train a Random Forest classifier to distinguish the genes belonging to the risk class. Expression profiles will be ranked by correlation between their SHAP and gene expression values. Optionally, drugs can be ranked by maximal probabilities of their targets to be assigned to a risk class.'''),
+    dcc.Markdown(children='''# GCDPipe: gene, cell type, and drug prioritization for complex traits'''),
+    dcc.Markdown(children='''The pipeline will use GWAS genetic fine-mapping data and expression profiles across cell types/tissues or other categories of interest to train a Random Forest classifier to distinguish the genes belonging to the risk class. Expression profiles will be ranked by correlation between their SHAP and gene expression values. Receptors for small molecule ligands presented in Cellinker database can be subsetted with the corresponding ligand information. Optionally, drugs can be ranked by maximal probabilities of their targets to be assigned to a risk class.'''),
     dcc.Markdown(children='''A list of drugs can also be provided to compare probabilities of their targets to be assigned to a risk class with that for other genes as well as to compare maximal risk probabilities of their targets with those for other drugs.'''),
     dcc.Markdown(children='''### Required input files:'''),
     dcc.Markdown(children='''1. a .csv file with columns named "pipe_genesymbol" and "is_True", in which the genes derived from GWAS genetic fine-mapping procedure are listed and their risk category (1 or 0) is provided (a True-False set for classifier training). [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/schizophrenia_mapped_tf_geneset.csv?token=GHSAT0AAAAAABSVV6MLYUQXLBY3Y6HR75L6YS6ZTVQ), [Example 2 (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_mapped_tf_geneset.csv?token=GHSAT0AAAAAABSVV6MKJOA5YSLCANFNRKKKYS6ZUQA) '''),
@@ -179,6 +176,7 @@ app.layout = html.Div([
     dcc.Markdown(children='''### Optional input files (for drug-gene interaction analysis):'''),
     dcc.Markdown(children='''3. a .csv file with columns named "DRUGBANK_ID" and "pipe_genesymbol", in which drugs and their gene targets are provided. [Example (is assembled from DrugCentral and DGIDB data; can be used as a default input)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/drug_targets_data.csv?token=GHSAT0AAAAAABSVV6MLQZ2CV6EIH6ST6EVUYS6ZZ7Q)'''),
     dcc.Markdown(children='''4. a .csv file with a column named "DRUGBANK_ID" with drugs belinging to the category of interest. [Example 1 (schizophrenia)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/schizophrenia/schizophrenia_drugs.csv?token=GHSAT0AAAAAABSVV6MKTWRL7SVXUHGCRMPAYS6Z4KQ), [Example 2 (IBD)] (https://raw.githubusercontent.com/ACDBio/GCDPipe/main/app_input_examples/IBD/IBD_drugs.csv?token=GHSAT0AAAAAABSVV6MKYBOJR442UN6IA4PWYS6Z3RA)'''),
+    dcc.Markdown(children='''If Cellinker ligand ranking based on receptor scores is desired, mark the corresponding checkbox.'''),
     dcc.Markdown(children='''If the used gene nomenculature is not unified across the files, set an option to unify gene symbols. In this case, they will be remapped to HUGO gene nomenclature. Unmapped genes will be dropped and numeric variables will be grouped by gene symbol summarised with 'max' function.'''),
     dcc.Markdown(children='''Note that the provided hyperparameter search space can be changed using the sliders.'''),
     dcc.Markdown(children='''See [Github] (https://github.com/ACDBio/GCDPipe) for further explanations.'''),
@@ -245,6 +243,10 @@ app.layout = html.Div([
                     children=[html.Div([html.Div(id='upload-features-display')])],
                     type="cube",
                 ),
+                
+    dcc.Checklist(options=[
+       {'label': 'Rank the Cellinker small molecule ligands based on the receptor gene score', 'value': 'rank_cellinker'}], 
+       id='rank_ligands-checklist'),  
 
     dcc.Checklist(options=[
        {'label': 'Drug-risk gene interaction assessment', 'value': 'drug_analysis_True'}], 
@@ -254,6 +256,36 @@ app.layout = html.Div([
     dcc.Checklist(options=[
        {'label': 'Unify gene nomenculature with HUGO', 'value': 'remap_genes_True'}], 
        id='remapping-checklist'),
+       
+#---     
+    html.Div([
+    dcc.Upload(
+        id='upload-drugs',
+        children=html.Div([
+            '3. Drug-target interaction data (binary): Drag and Drop or ',
+            html.A('Select a File')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        # Allow multiple files to be uploaded
+        multiple=False
+    ),
+    html.Div(id='upload-drugs-display'),
+    dcc.Checklist(options=[
+       {'label': 'Compare drug target gene probabilities to be assigned to the risk class for the selected drugs with that for other genes', 'value': 'drug_target_comparison_True'},
+       {'label': 'Compare drug selection scores with other drug scores', 'value': 'drug_comparison_True'}], 
+       id='drug-analysis-options-checklist'), 
+    html.Div(id='drug-target-enrichment-options-container') 
+    ], id='drug_upload_addons', style={'display':'none'}),
+#---
 
     dcc.Loading(
                     id="remapping-loading",
@@ -268,11 +300,12 @@ app.layout = html.Div([
     dcc.RangeSlider(0, 1, 0.1, value=[0.3], id='input-testing_gs_ratio',  tooltip={"placement": "bottom", "always_visible": True}, marks=None),
     dcc.Markdown(children=''' \n Max tree depth:'''),
     dcc.RangeSlider(1, 100, 1, value=[1], id='input-max_depth',  tooltip={"placement": "bottom", "always_visible": True}, marks=None),
-    dcc.Markdown(children=''' \n Number of samples per leaf:'''),
+    dcc.Markdown(children=''' \n Number of samples per leaf (it is possible to set up to 10 values to search from by sliding the points from the default value):'''),
     dcc.RangeSlider(1, 50, 1, value=[5,5,5,5,5,5,5,5,5,5], id='input-n_samples_per_leaf',  tooltip={"placement": "bottom", "always_visible": True}), #[5,10,15,20,25,30] was used in the original study
-    dcc.Markdown(children=''' \n Min number of samples required to split an internal node:'''),
+    dcc.Markdown(children=''' \n Min number of samples required to split an internal node (set up to 10 values to search from by sliding the points from the default value):'''),
     dcc.RangeSlider(1, 50, 1, value=[5,5,5,5,5,5,5,5,5,5], id='input-min_samples_split',  tooltip={"placement": "bottom", "always_visible": True}), #[2,5,10,20,30,40] was used in the original study
-    
+    dcc.Markdown(children=''' \n Min impurity decrease (set up to 10 values to search from by sliding the points from the default value):'''),
+    dcc.RangeSlider(0, 1, 0.05, value=[0,0,0,0,0,0,0,0,0,0], id='input-min_impurity_decrease',  tooltip={"placement": "bottom", "always_visible": True}), #0 was used in the original stosy
     html.Div([html.Button("Launch the pipeline", id="start_training", style={"padding": "1rem 1rem", "margin-top": "2rem", "margin-bottom": "1rem"}),
     dcc.Loading(
                     id="training-loading",
@@ -302,60 +335,61 @@ app.layout = html.Div([
 def process_gene_input(contents, name, date, tfgen_option):
     if contents is not None:
         data=parse_content(contents, name, date)
-        genedata_df=pd.read_json(data, orient='split')
-        genedata_df_fordisplay=genedata_df.loc[0:2,:]
-
-        if tfgen_option is None:
-            return data, [html.Div('First rows of the generated set:'), dash_table.DataTable(
-                                                                            genedata_df_fordisplay.to_dict('records'),
-                                                                            [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
-                                                                            style_table={'overflowX': 'auto'},
-                                                                            style_cell={
-                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-                                                                                        'overflow': 'hidden',
-                                                                                        'textOverflow': 'ellipsis'
-                                                                                        },
-                                                                            fill_width=False
-                                                                            )], []
-
-        if tfgen_option is not None:
-            if tfgen_option[0]=='tfset_from_locifile_True':
-                res=get_gene_loci_df(true_gene_df=genedata_df)
-                tfdata_df=res['tfset']
-                risk_gene_count=res['risk gene count']
-                total_gene_count=res['total gene count']
-
-            return tfdata_df.to_json(orient='split'), [html.Div('First rows of the generated set:'), dash_table.DataTable(
-                                                                            genedata_df_fordisplay.to_dict('records'),
-                                                                            [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
-                                                                            style_table={'overflowX': 'auto'},
-                                                                            style_cell={
-                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-                                                                                        'overflow': 'hidden',
-                                                                                        'textOverflow': 'ellipsis'
-                                                                                        },
-                                                                            fill_width=False
-                                                                            )], [html.Div(f'Risk gene count in the obtained training-testing gene set: {risk_gene_count}'),
-                                                    html.Div(f'Total gene count in the obtained training-testing gene set: {total_gene_count}'),
-                                                    html.Div('The generated set:'),
-                                                    dash_table.DataTable(
-                                                                            tfdata_df.to_dict('records'),
-                                                                            [{'name': i, 'id': i} for i in tfdata_df.columns],
-                                                                            style_table={'overflowX': 'auto'},
-                                                                            style_cell={
-                                                                                        'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
-                                                                                        'overflow': 'hidden',
-                                                                                        'textOverflow': 'ellipsis'
-                                                                                        },
-                                                                            fill_width=False,
-                                                                            editable=False,
-                                                                            page_current= 0,
-                                                                            page_size= 5,
-                                                                            filter_action="native",
-                                                                            sort_action="native",
-                                                                            export_format="csv"
-                                                                            )]
-
+        if data[1]=='ok':
+            data=data[0]
+            genedata_df=pd.read_json(data, orient='split')
+            genedata_df_fordisplay=genedata_df.loc[0:2,:]
+            
+            if tfgen_option is None:
+                return data, [html.Div('First rows of the generated set:'), dash_table.DataTable(
+		                                                                    genedata_df_fordisplay.to_dict('records'),
+		                                                                    [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
+		                                                                    style_table={'overflowX': 'auto'},
+		                                                                    style_cell={
+		                                                                                'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+		                                                                                'overflow': 'hidden',
+		                                                                                'textOverflow': 'ellipsis'
+		                                                                                },
+		                                                                    fill_width=False
+		                                                                    )], []
+            if tfgen_option is not None:
+                if tfgen_option[0]=='tfset_from_locifile_True':
+                    res=get_gene_loci_df(true_gene_df=genedata_df)
+                    tfdata_df=res['tfset']
+                    risk_gene_count=res['risk gene count']
+                    total_gene_count=res['total gene count']
+                    return tfdata_df.to_json(orient='split'), [html.Div('First rows of the generated set:'), dash_table.DataTable(
+	                                                                    genedata_df_fordisplay.to_dict('records'),
+	                                                                    [{'name': i, 'id': i} for i in genedata_df_fordisplay.columns],
+	                                                                    style_table={'overflowX': 'auto'},
+	                                                                    style_cell={
+		                                                                                'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+		                                                                                'overflow': 'hidden',
+		                                                                                'textOverflow': 'ellipsis'
+		                                                                                },
+		                                                                    fill_width=False
+		                                                                    )], [html.Div(f'Risk gene count in the obtained training-testing gene set: {risk_gene_count}'),
+		                                            html.Div(f'Total gene count in the obtained training-testing gene set: {total_gene_count}'),
+		                                            html.Div('The generated set:'),
+		                                            dash_table.DataTable(
+		                                                                    tfdata_df.to_dict('records'),
+		                                                                    [{'name': i, 'id': i} for i in tfdata_df.columns],
+		                                                                    style_table={'overflowX': 'auto'},
+		                                                                    style_cell={
+		                                                                                'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+		                                                                                'overflow': 'hidden',
+		                                                                                'textOverflow': 'ellipsis'
+		                                                                                },
+		                                                                    fill_width=False,
+		                                                                    editable=False,
+		                                                                    page_current= 0,
+		                                                                    page_size= 5,
+		                                                                    filter_action="native",
+		                                                                    sort_action="native",
+		                                                                    export_format="csv"
+		                                                                    )]
+        if data[1]=='parsing_error':
+            return [], [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')],[]
     else:
         return [],[],[]
 
@@ -473,13 +507,13 @@ def parse_content(contents, filename, date):
                 io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
-        return df.to_json(orient='split')
+            df = [pd.read_excel(io.BytesIO(decoded))]
+        return [df.to_json(orient='split'), 'ok']
     except Exception as e:
         print(e)
-        return html.Div([
+        return [html.Div([
             'There was an error processing this file.'
-        ])
+        ]), 'parsing_error']
 
 
 
@@ -493,23 +527,27 @@ def parse_content(contents, filename, date):
 def update_output(contents, name, date):
     if contents is not None:
         data=parse_content(contents, name, date)
-        featuredata_df=pd.read_json(data, orient='split')
-        featuredata_df_fordisplay=featuredata_df.loc[0:2,:]
-        return data, [
+        if data[1]=='ok':
+            data=data[0]
+            featuredata_df=pd.read_json(data, orient='split')
+            featuredata_df_fordisplay=featuredata_df.loc[0:2,:]
+            return data, [
 
 
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            featuredata_df_fordisplay.to_dict('records'),
-            [{'name': i, 'id': i} for i in featuredata_df_fordisplay.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
+                html.Div('First rows read:'),
+                dash_table.DataTable(
+                featuredata_df_fordisplay.to_dict('records'),
+                [{'name': i, 'id': i} for i in featuredata_df_fordisplay.columns],
+                    style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                fill_width=False
+            )]
+        if data[1]=='parsing_error':
+            return [], [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')]
     else:
         return [],[]
 
@@ -521,23 +559,24 @@ def update_output(contents, name, date):
               prevent_initial_call=True)
 def update_output(data):
     if data is not None:
-        df=pd.read_json(data, orient='split')
-        df=df.loc[0:2,:]
-        return [
-
-
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            df.to_dict('records'),
-            [{'name': i, 'id': i} for i in df.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
+        if data!='parsing_error':
+            df=pd.read_json(data, orient='split')
+            df=df.loc[0:2,:]
+            return [
+                html.Div('First rows read:'),
+                dash_table.DataTable(
+                df.to_dict('records'),
+                [{'name': i, 'id': i} for i in df.columns],
+                    style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                fill_width=False
+            )]
+        if data=='parsing_error':
+            return [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')]
     else:
         return []
 
@@ -550,23 +589,25 @@ def update_output(data):
 def update_output(contents, name, date):
     if contents is not None:
         data_content=parse_content(contents, name, date)
-        data = pd.read_json(data_content, orient='split')
-        data_fordisplay=data.loc[0:2,:]
-        return data_content, [
-
-
-            html.Div('First rows read:'),
-            dash_table.DataTable(
-            data_fordisplay.to_dict('records'),
-            [{'name': i, 'id': i} for i in data_fordisplay.columns],
-                style_table={'overflowX': 'auto'},
-            style_cell={
-                'height': 'auto',
-                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            },
-            fill_width=False
-        )]
+        if data_content[1]=='ok':
+            data=data_content[0]
+            data = pd.read_json(data, orient='split')
+            data_fordisplay=data.loc[0:2,:]
+            return data_content[0], [
+                html.Div('First rows read:'),
+                dash_table.DataTable(
+                data_fordisplay.to_dict('records'),
+                [{'name': i, 'id': i} for i in data_fordisplay.columns],
+                    style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                fill_width=False
+            )]
+        if data_content[1]=='parsing_error':
+            return [], [html.Div('ERROR PROCESSING THE FILE! The file seems not to be in a .csv format. Upload a .csv file, please.')]
     else:
         return [],[]
 
@@ -583,6 +624,10 @@ def update_output(contents, name, date):
 def update_output(contents, name, date):
     if contents is not None:
         data_content=parse_content(contents, name, date)
+        if data_content[1]=='ok':
+            data_content=data_content[0]
+        if data_content[1]=='parsing_error':
+            data_content=data_content[1]
         return data_content
 
 
@@ -672,12 +717,14 @@ def add_drug_list_upload(drug_analysis_options_value):
               Input('input-max_depth','value'),
               Input('input-n_samples_per_leaf','value'),
               Input('input-min_samples_split','value'),
+              Input('input-min_impurity_decrease','value'),
               Input('upload-drugs-checklist','value'),
               Input('drug_data', 'data'),
               Input('drug-analysis-options-checklist', 'value'),
               Input('drug_list', 'data'),
+              Input('rank_ligands-checklist','value'),
               prevent_initial_call=True)
-def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, drug_analysis_requirement, d_data, drug_analysis_options, d_list):
+def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ratio, max_depth, n_samples_leaf, min_samples_split, min_impurity_decrease, drug_analysis_requirement, d_data, drug_analysis_options, d_list, rank_ligands_requirement='None', cellinker_filepath='./app_default_assets/human-sMOL_remapped.txt'):
     if n_clicks is not None:
         if n_clicks>0:
             if gene_data is None:
@@ -707,13 +754,14 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             print('Training risk gene count:')
             print(Y_test.sum())
             
-            classifier_tuned_parameters_rf={'bootstrap': [True],
-                                            'max_depth': np.unique(max_depth),
-                                            'max_features': ['auto', 'sqrt'],
+            classifier_tuned_parameters_rf={'bootstrap':[True],
+                                            'max_depth':np.unique(max_depth),
+                                            'max_features':['auto', 'sqrt'],
                                             'min_samples_leaf':np.unique(n_samples_leaf),
                                             'min_samples_split':np.unique(min_samples_split),
                                             'max_features':[None],
-                                            'n_estimators': [n_estimators]}
+                                            'n_estimators':[n_estimators],
+                                            'min_impurity_decrease':np.unique(min_impurity_decrease)}
 
             clf=GridSearchCVProgressBar(RandomForestClassifier(oob_score=True,bootstrap = True), classifier_tuned_parameters_rf, scoring='f1_weighted', verbose=1)
             print('Hyperparameter tuning for the rf model...')
@@ -801,18 +849,29 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
 
             explainer = shap.TreeExplainer(clf.best_estimator_)
-            shap_values = explainer.shap_values(classifier_building_df.iloc[:,:-1])    
-
-
-            shap_riskclass_df=pd.DataFrame(shap_values[1])
-            shap_riskclass_df.columns=classifier_building_df.iloc[:,:-1].columns 
-
-  
-
-            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(classifier_building_df.iloc[:, 1:].reset_index(drop=True),axis=0) #CHECK HERE
+            shap_values = explainer.shap_values(processed_df)    
+            shap_riskclass_df=pd.DataFrame(abs(shap_values[1])) 
+            shap_riskclass_df.columns=processed_df.columns 
+            shap_riskclass_means=pd.DataFrame(shap_riskclass_df.mean(axis=0)).reset_index().rename(columns={'index':'expression_profile', 0:'mean_abs_shap_riskclass'})
+           
+            
+            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(processed_df.reset_index(drop=True),axis=0, method='pearson')
             riskclass_shap_featurevalue_correlation=corr_between_shap_and_exprs_values.sort_values(ascending=False)
             riskclass_shap_featurevalue_correlation=riskclass_shap_featurevalue_correlation.fillna(0)
-            riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'importance_based_score':list(riskclass_shap_featurevalue_correlation)})
+            riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'corrcoef_riskclass':list(riskclass_shap_featurevalue_correlation)})
+       
+
+
+
+
+        
+            feature_importance_resdf=pd.merge(shap_riskclass_means, riskclass_shap_featurevalue_correlation, on='expression_profile',how='left')
+          
+            correlation_sign=np.sign(feature_importance_resdf['corrcoef_riskclass'])
+            feature_importance_resdf['feature_score']=correlation_sign*feature_importance_resdf['mean_abs_shap_riskclass']
+            feature_importance_resdf=feature_importance_resdf.sort_values('feature_score', ascending=False)
+            #feature_importance_resdf['mean_shap_value_scaled']= minmax_scale(feature_importance_resdf[['mean_shap_value']], feature_range=(0,1))
+
             res= [
                  dcc.Markdown(children='''# Classifier test performance'''),
                  dcc.Graph(figure=fig_roc),
@@ -843,7 +902,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
                  
                  dcc.Store(id='gene_probabilities', data=predicted_probs.to_json(orient='split')),
-                 dcc.Store(id='expression_profile_importances', data=riskclass_shap_featurevalue_correlation.to_json(orient='split')), 
+                 dcc.Store(id='expression_profile_importances', data=feature_importance_resdf.to_json(orient='split')), 
                  
                  dcc.Markdown(children='''# Classification results'''),
                  dcc.Markdown(children='''### Gene probabilities to be assigned to the risk class: '''),
@@ -868,8 +927,8 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                 dcc.Markdown(children='''### Importance-based expression profile scores: '''),
                 dash_table.DataTable(
                     id='expression_profile_importances',
-                    data=riskclass_shap_featurevalue_correlation.to_dict('records'),
-                    columns=[{'name': i, 'id': i} for i in riskclass_shap_featurevalue_correlation.columns],
+                    data=feature_importance_resdf.to_dict('records'),
+                    columns=[{'name': i, 'id': i} for i in feature_importance_resdf.columns],
                     style_table={'overflowX': 'auto'},
                     editable=False,
                     page_current= 0,
@@ -884,6 +943,33 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                     },
                     fill_width=False
                     )]
+                    
+            if rank_ligands_requirement is not None:
+            	if rank_ligands_requirement[0]=='rank_cellinker':
+            	    cellinker_db=pd.read_csv(cellinker_filepath, sep='\t')
+            	    ligand_df=pd.merge(predicted_probs,cellinker_db, on='pipe_genesymbol', how='left')
+            	    ligand_df=ligand_df.dropna()
+            	    ligand_df=ligand_df.sort_values(by='score', axis=0, ascending=False)
+            	    res.append(dcc.Markdown('''### Cellinker receptor gene scores and the associated ligands:'''))
+            	    res.append(dash_table.DataTable(
+                            id='ligand_scores',
+                            data=ligand_df.to_dict('records'),
+                            columns=[{'name': i, 'id': i} for i in ligand_df.columns],
+                            style_table={'overflowX': 'auto'},
+                            editable=False,
+                            page_current= 0,
+                            page_size= 10,
+                            filter_action="native",
+                            sort_action="native",
+                            export_format="csv",
+                            style_cell={
+                            'minWidth': '10px', 'width': '100px', 'maxWidth': '500px',
+                            'overflow': 'hidden',
+                            'textOverflow': 'ellipsis'
+                            },
+                            fill_width=False
+                            ))
+            
             if drug_analysis_requirement is not None:
                 if drug_analysis_requirement[0]=='drug_analysis_True':
                     res.append(dcc.Markdown(children='''# Drug ranking results'''))
@@ -896,9 +982,14 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                         drugdata_df=drugdata_df.dropna()
 
 
-                        drugdata_df_agg=drugdata_df.groupby('DRUGBANK_ID')[['score']].agg('max')
-                        drugdata_df_agg['has_risk_class_targets']=drugdata_df_agg['score']>optimal_threshold
-                        drugdata_df_agg=drugdata_df_agg.sort_values(ascending=False, by=['score'])
+                        drugdata_df_agg=drugdata_df.groupby('DRUGBANK_ID')[['score']].agg([np.max,np.mean,np.min,np.std])
+                        drugdata_df_agg.columns = drugdata_df_agg.columns.get_level_values(1)
+                        drugdata_df_agg=drugdata_df_agg.reset_index()
+                        print(drugdata_df_agg)
+                        drugdata_df_agg=drugdata_df_agg.fillna(0)
+                        drugdata_df_agg=drugdata_df_agg.rename(columns={'amax':'max_targetgene_score', 'mean':'mean_targetgene_score', 'amin':'min_targetgene_score', 'std':'targetgene_score_std'})
+                        drugdata_df_agg['has_risk_class_targets']=drugdata_df_agg['max_targetgene_score']>optimal_threshold
+                        drugdata_df_agg=drugdata_df_agg.sort_values(ascending=False, by=['mean_targetgene_score'])
                         drugdata_df_agg=drugdata_df_agg.reset_index()
                         
                         res.append(dash_table.DataTable(
@@ -991,21 +1082,14 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                         
 
                         if 'drug_comparison_True' in drug_analysis_options:
-                            res.append(dcc.Markdown(children='''#### Comparison between aggregation-based drug scores for the selected drugs and other drugs: '''))
+                            res.append(dcc.Markdown(children='''#### Comparison between mean drug target gene scores for the selected drugs and other drugs: '''))
 
                             drugdata_df_agg_drug_comparison=pd.merge(drugdata_df_agg, d_list, on='DRUGBANK_ID', how='left')
                             drugdata_df_agg_drug_comparison.target_drug_category=drugdata_df_agg_drug_comparison.target_drug_category.fillna('False')
 
-                            #fig_drug_comparison = px.histogram(drugdata_df_agg_drug_comparison, x='score', color='target_drug_category',
-                            #                    marginal="box", # box, violin, rug
-                            #                    hover_data=drugdata_df_agg_drug_comparison.columns,
-                            #                    opacity=0.5,
-                            #                    histnorm="probability density",
-                            #                    barmode='overlay')
 
-
-                            hist_data = [list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['score']),
-                                        list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['score'])]
+                            hist_data = [list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['mean_targetgene_score']),
+                                        list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['mean_targetgene_score'])]
                             group_labels = ['Other drugs', 'Selected drugs']
                             colors = [color_scheme['twocat_2'], color_scheme['twocat_1']]
 
@@ -1015,8 +1099,8 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
 
 
-                            U1, p = mannwhitneyu(list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['score']),
-                            list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['score']))
+                            U1, p = mannwhitneyu(list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='True']['mean_targetgene_score']),
+                            list(drugdata_df_agg_drug_comparison[drugdata_df_agg_drug_comparison.target_drug_category=='False']['mean_targetgene_score']))
                             p=round(p, 5)
                             name=f'P={p}, U={U1} (Mann-Whitney)'
 
@@ -1024,17 +1108,17 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
                             fig_drug_comparison.update_layout(
                                 template='plotly_white',
                                 title=name,
-                                xaxis_title='scores',
+                                xaxis_title='mean_targetgene_scores',
                                 width=1000, height=700)
 
                             res.append(dcc.Graph(figure=fig_drug_comparison))
                         
-                            fig_drug_comparison_box = px.box(drugdata_df_agg_drug_comparison, x='target_drug_category', y='score', color='target_drug_category', points='all',
+                            fig_drug_comparison_box = px.box(drugdata_df_agg_drug_comparison, x='target_drug_category', y='mean_targetgene_score', color='target_drug_category', points='all',
                                 color_discrete_map={
                                         'True': color_scheme['twocat_1'],
                                         'False': color_scheme['twocat_2']
                                     },
-                                    hover_data=['DRUGBANK_ID','score']
+                                    hover_data=['DRUGBANK_ID','mean_targetgene_score']
                                 )
                             fig_drug_comparison_box.update_traces(showlegend=False)
                             fig_drug_comparison_box.update_layout(
