@@ -850,12 +850,18 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
 
             explainer = shap.TreeExplainer(clf.best_estimator_)
             shap_values = explainer.shap_values(processed_df)    
+            shap_riskclass_df_notabs=pd.DataFrame(shap_values[1])
             shap_riskclass_df=pd.DataFrame(abs(shap_values[1])) 
+
+            
+
             shap_riskclass_df.columns=processed_df.columns 
+            shap_riskclass_df_notabs.columns=processed_df.columns 
+
             shap_riskclass_means=pd.DataFrame(shap_riskclass_df.mean(axis=0)).reset_index().rename(columns={'index':'expression_profile', 0:'mean_abs_shap_riskclass'})
            
             
-            corr_between_shap_and_exprs_values=shap_riskclass_df.corrwith(processed_df.reset_index(drop=True),axis=0, method='pearson')
+            corr_between_shap_and_exprs_values=shap_riskclass_df_notabs.corrwith(processed_df.reset_index(drop=True),axis=0, method='pearson')
             riskclass_shap_featurevalue_correlation=corr_between_shap_and_exprs_values.sort_values(ascending=False)
             riskclass_shap_featurevalue_correlation=riskclass_shap_featurevalue_correlation.fillna(0)
             riskclass_shap_featurevalue_correlation=pd.DataFrame.from_dict({'expression_profile':riskclass_shap_featurevalue_correlation.index.tolist(),'corrcoef_riskclass':list(riskclass_shap_featurevalue_correlation)})
