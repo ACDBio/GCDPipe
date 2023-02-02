@@ -948,7 +948,7 @@ def train_rf_classifier(n_clicks, gene_data, feature_data, n_estimators, test_ra
             	if rank_ligands_requirement[0]=='rank_cellinker':
             	    cellinker_db=pd.read_csv(cellinker_filepath, sep='\t')
             	    ligand_df=pd.merge(predicted_probs,cellinker_db, on='pipe_genesymbol', how='left')
-            	    ligand_df=ligand_df.dropna()
+            	    ligand_df=ligand_df.fillna(0)
             	    ligand_df=ligand_df.sort_values(by='score', axis=0, ascending=False)
             	    res.append(dcc.Markdown('''### Cellinker receptor gene scores and the associated ligands:'''))
             	    res.append(dash_table.DataTable(
